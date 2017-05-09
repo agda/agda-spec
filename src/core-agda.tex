@@ -73,7 +73,7 @@
 \subtitlenote{with subtitle note}       %% \subtitlenote is optional;
                                         %% can be repeated if necessary;
                                         %% contents suppressed with 'anonymous'
-
+ x
 
 %% Author information
 %% Contents and number of authors suppressed with 'anonymous'.
@@ -195,13 +195,15 @@ the core components of Agda.
 \label{sec:syntax}
 
 Names
-\begin{verbatim}
-  D    Datatype name
-  R    Record type name
-  f    Function name
-  π    Projection name  (overloaded)
-  c    Constructor name (overloaded)
-\end{verbatim}
+\[
+\begin{array}{ll}
+D   & \hspace{2cm}\text{Datatype name} \\
+  R & \hspace{2cm}\text{   Record type name} \\
+  f & \hspace{2cm}\text{   Function name} \\
+\pi & \hspace{2cm}\text{  Projection name  (overloaded)} \\
+  c & \hspace{2cm}\text{   Constructor name (overloaded)} \\
+\end{array}
+\]
 
 Variables (represented by a de Bruijn-index)
 \begin{verbatim}
@@ -293,6 +295,70 @@ Mutual block
 \begin{verbatim}
 mutual d*
 \end{verbatim}
+
+Signature declaration
+\[
+\begin{array}{lcl}
+d_\Sigma & ::= & \text{data } D\Gamma: \Delta \to S \text{ where } \overline{c : T} \\
+& \| & \text{record } R\Gamma : S \text{where constructor $c$; } \overline{\text{field }\pi : T} \\
+& \| & \text{function } f : T \text{ where } \overline{cl}
+\end{array}
+\]
+
+
+Signature
+\[
+\begin{array}{lcl}
+\Sigma & ::= &  \overline{d_\Sigma} \\
+\end{array}
+\]
+
+Hereditary substitution
+\[
+\begin{array}{lll}
+u[\sigma] = v & t \! \overline{e} = v & t \! \cdot = t \\
+D \overline{v} \! \@ \overline{u} = D \overline{v} \overline{u}
+& R \overline{v} \! \@ \overline{u} = R \overline{v} \overline{u}
+\end{array}
+
+\begin{array}{ll}
+\frac{\sigma(x) \! \overline{e}[\sigma] = v}
+{x \overline{e}[\sigma] = v}
+&
+\frac{\overline{e}[\sigma] = \overline{e}'}
+{f \overline{e}[sigma] = f \overline{e}'}
+\\
+\frac{ v[u/x] \! \overline{e} = v'}
+{\lambdax.v \! \@u \overline{e} = v'}
+&
+\frac{v_i ! \overline{e} = v'}
+{c_{\overline{pi}} \overline{v} \! .\pi_i \overline{e} = v'}
+\\
+\frac{c \overline{v} u \! \overline{e} = v'}
+{\overline{v} \! \@u \overline{e} = v'}
+&
+\frac{}
+{f \overline{e} \! \overline{e}' = f \overline{e} \overline{e}'}
+\]
+\\
+\frac{}
+{x \overline{e} \! \overline{e}' = x \overline{e} \overline{e}'}
+&
+\text{ everything else undefined }
+\end{array}
+\]
+
+Matching
+\[
+\begin{array}{ll}
+\overline{e}/\overline{q} = \sigma  & \leftrightarrow & 
+\overline{q}[\sigma] = \overline{e}
+\end{array}
+\]
+
+
+Weak head reduction
+
 
 
 \section{Evaluation}
