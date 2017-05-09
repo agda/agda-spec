@@ -199,7 +199,7 @@ Names
   D    Datatype name
   R    Record type name
   f    Function name
-  p    Projection name  (overloaded)
+  π    Projection name  (overloaded)
   c    Constructor name (overloaded)
 \end{verbatim}
 
@@ -227,13 +227,73 @@ t, u, v ::= x e*            Variables (eliminated by e*)
 Eliminations
 \begin{verbatim}
 e ::= @u                Application to term
-    | .p                Projection
+    | .π                Projection
 \end{verbatim}
 
 Sorts
 \begin{verbatim}
 s ::= Set_n             Universe of types of level n
 \end{verbatim}
+
+Telescopes
+\begin{verbatim}
+Γ , Δ ::= · | (x : T)Δ
+\end{verbatim}
+
+Iterated function types Γ → T
+\begin{verbatim}
+· → T = T
+(x : U)Δ → T = (x : U) → (Δ → T)
+\end{verbatim}
+
+\section{Declarations}
+\label{sec:declarations}
+
+Declarations
+\begin{verbatim}
+
+\end{verbatim}
+
+Type signatures
+\begin{verbatim}
+ts ::= f : T
+\end{verbatim}
+
+Function clauses
+\begin{verbatim}
+cl ::= f q* = t
+\end{verbatim}
+
+Copattern
+\begin{verbatim}
+q ::= @p | .π 
+\end{verbatim}
+
+Pattern
+\begin{verbatim}
+p ::= x       Variable pattern
+    | c p*    Constructor pattern
+    | .u      Dot pattern
+\end{verbatim}
+
+Data definition
+\begin{verbatim}
+data D Γ : Δ → s where 
+  (c : T)*
+\end{verbatim}
+
+Record declaration
+\begin{verbatim}
+record R Γ : s where
+  constructor c
+  field (π : T)*
+\end{verbatim}
+
+Mutual block
+\begin{verbatim}
+mutual d*
+\end{verbatim}
+
 
 \section{Evaluation}
 \label{sec:evaluation}
@@ -252,6 +312,24 @@ s ::= Set_n             Universe of types of level n
 
 \section{Extensions}
 \label{sec:extensions}
+
+\subsection{Extended record declarations}
+
+Record types
+\begin{verbatim}
+record R Γ : s where
+  [constructor c]
+  [(co)inductive]
+  [(no-)eta-equality]
+  rd*
+\end{verbatim}
+
+Record declaration
+\begin{verbatim}
+rd ::= field π : T
+     | ts
+     | cl 
+\end{verbatim}
 
 
 %% Acknowledgments
