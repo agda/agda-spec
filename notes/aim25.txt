@@ -1,0 +1,50 @@
+2017-05-09
+
+What form should the specification have?
+
+In the style of "A simple type-theoretic language Mini-TT"
+
+Core syntax.
+
+- lambda-Pi
+- Universes
+- datatypes and functions by pattern matching
+- records types, copatterns
+
+Evaluation rules.
+
+Typing rules.
+
+Coverage rules.
+
+Positivity checking
+
+Termination checking.
+
+
+
+
+Extensions
+
+- universe polymorphism, Setω
+
+- literals
+
+- irrelevance
+
+- abstract
+
+
+
+
+
+
+
+
+TRASH
+
+--> read off from CheckInternal
+
+--> datatypes, record types, pattern matching,
+
+-->
