@@ -1,0 +1,108 @@
+% evergreens
+\newcommand{\bla}{\ensuremath{\mbox{$$}}} % invisible, but not ignored
+\newcommand{\der}{\,\vdash}
+\newcommand{\of}{\!:\!}
+\newcommand{\is}{\!=\!}
+\newcommand{\red}{\longrightarrow}
+\newcommand{\restrict}{\upharpoonright}
+\newcommand{\FV}{\ensuremath{\mathsf{FV}}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\defas}{\mathrel{\ :\Longleftrightarrow\ }}
+\newcommand{\defiff}{\mathrel{:\Longleftrightarrow}}
+
+% latin etc. abbrev
+\newcommand{\abbrev}[1]{#1} % alternative: \emph{#1}
+\newcommand{\cf}{\abbrev{cf.}\ }
+\newcommand{\eg}{\abbrev{e.\,g.}}
+\newcommand{\Eg}{\abbrev{E.\,g.}}
+\newcommand{\ie}{\abbrev{i.\,e.}}
+\newcommand{\Ie}{\abbrev{I.\,e.}}
+\newcommand{\etal}{\abbrev{et.\,al.}}
+\newcommand{\wwlog}{w.\,l.\,o.\,g.} % \wlog is ``write into log file''
+\newcommand{\Wlog}{W.\,l.\,o.\,g.}
+\newcommand{\wrt}{w.\,r.\,t.}
+
+% paragraphs
+\newcommand{\para}[1]{\paragraph*{\it#1}}
+\newcommand{\paradot}[1]{\para{#1.}}
+
+% proof by cases
+\newenvironment{caselist}{%
+  \begin{list}{{\it Case}}{%
+    %\setlength{\topsep}{2ex}% DOES NOT SEEM TO WORK
+    %\setlength{\itemsep}{2ex}%
+    \setlength{\itemindent}{-2ex}%
+  }%
+}{\end{list}%
+}
+\newenvironment{subcaselist}{%
+  \begin{list}{{\it Subcase}}{}%
+}{\end{list}%
+}
+\newenvironment{subsubcaselist}{%
+  \begin{list}{{\it Subsubcase}}{}%
+}{\end{list}%
+}
+
+\newcommand{\nextcase}{\item~}
+
+% meta-level logic
+\newcommand{\mfor}{\ \mbox{for}\ }
+\newcommand{\mforsome}{\ \mbox{for some}\ }
+\newcommand{\mthen}{\ \mbox{then}\ }
+\newcommand{\mif}{\ \mbox{if}\ }
+\newcommand{\miff}{\ \mbox{iff}\ }
+\newcommand{\motherwise}{\ \mbox{otherwise}}
+\newcommand{\mundefined}{\mbox{undefined}}
+\newcommand{\mnot}{\mbox{not}\ }
+\newcommand{\mand}{\ \mbox{and}\ }
+\newcommand{\mor}{\ \mbox{or}\ }
+\newcommand{\mimplies}{\ \mbox{implies}\ }
+\newcommand{\mimply}{\ \mbox{imply}\ }
+\newcommand{\mforall}{\ \mbox{for all}\ }
+\newcommand{\mexists}{\mbox{exists}\ }
+\newcommand{\mexist}{\mbox{exist}\ }
+\newcommand{\mtrue}{\mbox{true}}
+\newcommand{\mwith}{\ \mbox{with}\ }
+\newcommand{\mholds}{\ \mbox{holds}\ }
+\newcommand{\munless}{\ \mbox{unless}\ }
+\newcommand{\mboth}{\ \mbox{both}\ }
+\newcommand{\msuchthat}{\ \mbox{such that}\ }
+% proofs
+\newcommand{\msince}{\mbox{since}\ }
+\newcommand{\mdef}{\mbox{by def.}}
+\newcommand{\mass}{\mbox{assumption}}
+\newcommand{\mhyp}{\mbox{by hyp.}}
+\newcommand{\mlemma}[1]{\mbox{by Lemma~#1}}
+\newcommand{\mih}[1][]{\mbox{by ind.hyp.}#1}
+\newcommand{\mgoal}[1][]{\mbox{goal\ifthenelse{\equal{#1}{}}{}{~#1}}}
+\newcommand{\mby}[1]{\mbox{by #1}}
+\newcommand{\minfrule}{\mbox{by inference rule}}
+
+
+% Inference rules
+\newcommand{\rulename}[1]{\ensuremath{\mbox{\sc#1}}}
+\newcommand{\rul}[2]{\dfrac{\begin{array}[b]{@{}l@{}} #1 \end{array}}{#2}}
+\newcommand{\ru}[2]{\dfrac{\begin{array}[b]{@{}c@{}} #1 \end{array}}{#2}}
+\newcommand{\rux}[3]{\ru{#1}{#2}\ #3}
+\newcommand{\nru}[3]{#1\ \ru{#2}{#3}}
+\newcommand{\nrux}[4]{#1\ \ru{#2}{#3}\ #4}
+\newcommand{\dstack}[2]{\begin{array}[b]{c}#1\\#2\end{array}}
+\newcommand{\ndru}[4]{#1\ \ru{\dstack{#2}{#3}}{#4}}
+\newcommand{\ndrux}[5]{#1\ \ru{\dstack{#2}{#3}}{#4}\ #5}
+\newcommand{\lcol}[1]{\multicolumn{1}{@{}l@{}}{{#1}}}
+\newcommand{\rcol}[1]{\multicolumn{1}{@{}r@{}}{{#1}}}
+
+% Substitution and function update
+% read ``\subst F X A'' as ``substitute F for X in A''
+%\newcommand{\subst}[3]{#3[#2 := #1]}
+%\newcommand{\subst}[3]{[#1/#2]#3}
+\newcommand{\subst}[3]{#3[#1/#2]}
+% read ``\update \theta X \G'' as update \theta at point X by \G
+\newcommand{\update}[3]{#1[#2 \mapsto #3]}
+%\newcommand{\update}[3]{#1,#2 \is #3}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "core-agda"
+%%% End:
