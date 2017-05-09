@@ -10,6 +10,11 @@
                         %% http://ctan.org/pkg/booktabs
 \usepackage{subcaption} %% For complex figures with subfigures/subcaptions
                         %% http://ctan.org/pkg/subcaption
+\usepackage{mathpartir}
+
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\proj}{proj}
+\renewcommand{\|}{|}
 
 
 \makeatletter\if@ACM@journal\makeatother
@@ -194,6 +199,10 @@ the core components of Agda.
 \section{Syntax}
 \label{sec:syntax}
 
+\newcommand{\bang}{\,!\,}
+\newcommand{\twobang}{\,!!\,}
+
+
 Names
 \[
 \begin{array}{ll}
@@ -300,7 +309,7 @@ Signature declaration
 \[
 \begin{array}{lcl}
 d_\Sigma & ::= & \text{data } D\Gamma: \Delta \to S \text{ where } \overline{c : T} \\
-& \| & \text{record } R\Gamma : S \text{where constructor $c$; } \overline{\text{field }\pi : T} \\
+& \| & \text{record } R\Gamma : S \text{ where constructor $c$; } \overline{\text{field }\pi : T} \\
 & \| & \text{function } f : T \text{ where } \overline{cl}
 \end{array}
 \]
@@ -313,59 +322,156 @@ Signature
 \end{array}
 \]
 
+
+\section{Evaluation}
+\label{sec:evaluation}
+
 Hereditary substitution
 \[
 \begin{array}{lll}
-u[\sigma] = v & t \! \overline{e} = v & t \! \cdot = t \\
-D \overline{v} \! \@ \overline{u} = D \overline{v} \overline{u}
-& R \overline{v} \! \@ \overline{u} = R \overline{v} \overline{u}
+u[\sigma] = v & t \bang \overline{e} = v & t \bang \cdot = t \\
+D \overline{v} \bang @ \overline{u} = D \overline{v} \overline{u}
+& R \overline{v} \bang @ \overline{u} = R \overline{v} \overline{u}
 \end{array}
+\]
 
+\[
 \begin{array}{ll}
-\frac{\sigma(x) \! \overline{e}[\sigma] = v}
+\inferrule{\sigma(x) \bang \overline{e}[\sigma] = v}
 {x \overline{e}[\sigma] = v}
 &
-\frac{\overline{e}[\sigma] = \overline{e}'}
-{f \overline{e}[sigma] = f \overline{e}'}
+\inferrule{\overline{e}[\sigma] = \overline{e}'}
+{f \overline{e}[\sigma] = f \overline{e}'}
 \\
-\frac{ v[u/x] \! \overline{e} = v'}
-{\lambdax.v \! \@u \overline{e} = v'}
+\inferrule{ v[u/x] \bang \overline{e} = v'}
+{\lambda x.v \bang @u \overline{e} = v'}
 &
-\frac{v_i ! \overline{e} = v'}
-{c_{\overline{pi}} \overline{v} \! .\pi_i \overline{e} = v'}
+\inferrule{v_i ! \overline{e} = v'}
+{c_{\overline{pi}} \overline{v} \bang .\pi_i \overline{e} = v'}
 \\
-\frac{c \overline{v} u \! \overline{e} = v'}
-{\overline{v} \! \@u \overline{e} = v'}
+\inferrule{c \overline{v} u \bang \overline{e} = v'}
+{\overline{v} \bang @u \overline{e} = v'}
 &
-\frac{}
-{f \overline{e} \! \overline{e}' = f \overline{e} \overline{e}'}
-\]
+\inferrule{}
+{f \overline{e} \bang \overline{e}' = f \overline{e} \overline{e}'}
 \\
-\frac{}
-{x \overline{e} \! \overline{e}' = x \overline{e} \overline{e}'}
+\inferrule{}
+{x \overline{e} \bang \overline{e}' = x \overline{e} \overline{e}'}
 &
 \text{ everything else undefined }
 \end{array}
 \]
 
+
+
 Matching
 \[
 \begin{array}{ll}
-\overline{e}/\overline{q} = \sigma  & \leftrightarrow & 
-\overline{q}[\sigma] = \overline{e}
+\overline{e}/\overline{q} = \sigma  & 
+\Sigma \vdash e/q = \sigma
+\end{array}
+\]
+
+Evaluation
+\[
+\begin{array}{ll}
+\inferrule{}
+{\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
+& 
+\inferrule{}
+{\Sigma \vdash v/x = [v/x]} % var pat
+\\
+\inferrule{\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
+{\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
+&
+\inferrule{}
+{\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
+\\
+\inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma} 
+{\Sigma \vdash v / c \overline{p} = \sigma} % reduce
+& 
+\inferrule{v \bang \pi_i / p_i = \sigma}
+{\Sigma \vdash v / c_{\overline \pi} \overline{p} = \sigma} % record pat
+\end{array}
+\]
+
+Weak head reduction
+\[
+\begin{array}{ll}
+\Sigma \vdash t \to t' &
+\inferrule{f \overline q = t \in \Sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma}
+{\Sigma \vdash f \overline{e} \overline{e}' \to t[\sigma] \bang \overline{e}'}
+\\
+\inferrule{\Sigma \vdash e/q = \sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma'}
+{\Sigma \vdash e, \overline{e}/q, \overline{q} = \sigma \overset{\cup}{+} \sigma'}%patterns
+&
+\inferrule{}
+{\Sigma \vdash \cdot/\cdot = \cdot} %empty
 \end{array}
 \]
 
 
-Weak head reduction
-
-
-
-\section{Evaluation}
-\label{sec:evaluation}
-
 \section{Typing rules}
 \label{sec:typing}
+
+Context 
+\[
+\begin{array}{lcl}
+\Gamma & ::= & \cdot \| \Gamma, x:T \\
+\Delta & ::= & \cdot \| x:T, \Delta
+\end{array}
+\]
+
+Typing 
+\[
+\begin{array}{ll}
+\Gamma \vdash_\Sigma t : T & \Gamma \| u: U \vdash \overline{e} : T
+\end{array}
+\]
+
+Conversion 
+\[
+\begin{array}{ll}
+\Gamma \vdash_\Sigma t = t' : T & \Gamma \vdash_\Sigma \Delta \\
+\vdash_\Sigma \Gamma & \\
+
+% Contexts
+\inferrule{}
+{\vdash_\Sigma \cdot} & 
+\inferrule{\vdash_\Sigma \Gamma \qquad \Gamma \vdash_\Sigma T:s}
+{\vdash_\Sigma \Gamma, x : T} \qquad x \not\in \dom(\Gamma) \\
+
+% Telescopes
+\inferrule{\vdash_\Sigma \Gamma}
+{\vdash_\Sigma \cdot} &
+\inferrule{\Gamma \vdash_\Sigma T : s \qquad \Gamma, x:T \vdash_\Sigma \Delta}
+{\Gamma \vdash_\Sigma (x:T) \Delta}
+\qquad x \in \dom{\Delta} \\
+
+%Terms 
+\inferrule{(x:U)\in \Gamma \qquad \Gamma | x:U \vdash \overline{e}:T}
+{\Gamma \vdash x \overline{e} : T} 
+&
+% Check spine
+\inferrule{}
+{\Gamma \| u:U \vdash \cdot : U}
+\\
+\inferrule{\Gamma \vdash u:U \qquad \Gamma \| t@u:T[u/x] \vdash \overline{e : V}}
+{\Gamma \| t : \Pi x:U.T \vdash @u \overline{e}:V}
+&
+\inferrule{ \Gamma \vdash (t:R\overline{u}).\pi = T' 
+\qquad \Gamma \| t.\pi :T' \vdash_\Sigma \overline{e}:V}
+{ \Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
+\\
+\Sigma \vdash (t:R\overline{u}).\pi = T
+\\
+(t: \Sigma x:A.B).\proj_2 = B[t.\proj_1/x] &
+\\
+\inferrule{T[u/x] \twobang \overline{e} = v}
+{(\Pi x:U.T) \twobang @ u \overline{e} = v}
+\end{array}
+\]
+
 
 \section{Coverage}
 \label{sec:coverage}
