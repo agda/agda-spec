@@ -194,6 +194,47 @@ the core components of Agda.
 \section{Syntax}
 \label{sec:syntax}
 
+Names
+\begin{verbatim}
+  D    Datatype name
+  R    Record type name
+  f    Function name
+  p    Projection name  (overloaded)
+  c    Constructor name (overloaded)
+\end{verbatim}
+
+Variables (represented by a de Bruijn-index)
+\begin{verbatim}
+x
+\end{verbatim}
+
+Data/record type name
+\begin{verbatim}
+F ::= D | R
+\end{verbatim}
+
+Terms
+\begin{verbatim}
+t, u, v ::= x e*            Variables (eliminated by e*)
+          | c v*            Constructor applied to arguments v*
+          | f e*            Defined function (eliminated by e*), includes postulates
+          | \x. v           Lambda abstraction
+          | F v*            Data/record type
+          | s               Sort
+          | (x : A) -> B    Dependent function type
+\end{verbatim}
+
+Eliminations
+\begin{verbatim}
+e ::= @u                Application to term
+    | .p                Projection
+\end{verbatim}
+
+Sorts
+\begin{verbatim}
+s ::= Set_n             Universe of types of level n
+\end{verbatim}
+
 \section{Evaluation}
 \label{sec:evaluation}
 
