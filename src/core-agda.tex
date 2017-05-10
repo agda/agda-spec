@@ -14,7 +14,7 @@
 
 \DeclareMathOperator{\dom}{dom}
 \DeclareMathOperator{\proj}{proj}
-\renewcommand{\|}{|}
+\renewcommand{\|}{\mid}
 
 
 \makeatletter\if@ACM@journal\makeatother
@@ -226,7 +226,7 @@ F &::= & D \\& |& R
 \end{array}
 \]
 
-Terms
+Terms ($\beta$-normal).
 \[
 \begin{array}{lrll}
 t, u, v &::=& x\; \bar{e}            & \hspace{2cm}\text{Variables (eliminated by $\bar{e}$)} \\
@@ -235,28 +235,29 @@ t, u, v &::=& x\; \bar{e}            & \hspace{2cm}\text{Variables (eliminated b
           &|& \lambda x.\, v           & \hspace{2cm}\text{Lambda abstraction} \\
           &|& F\; \bar{v}            & \hspace{2cm}\text{Data/record type} \\
           &|& s               & \hspace{2cm}\text{Sort} \\
-          &|& (x : A) \rightarrow B      & \hspace{2cm}\text{Dependent function type} \\
+          &|& (x : U) \rightarrow V      & \hspace{2cm}\text{Dependent function type} \\
 \end{array}
 \]
 
-Eliminations
+Eliminations.
 \[\begin{array}{lrll}
 e &::=& @u                & \hspace{2cm}\text{Application to term} \\
     &|& .\pi               & \hspace{2cm}\text{ Projection} \\
 \end{array} \]
 
-Sorts
+Sorts.
 \[\begin{array}{lrll}
-s ::= Set_n             & \hspace{2cm} \text{Universe of types of level $n$} \\
+s ::= \Set_n             & \hspace{2cm} \text{Universe of types of level $n$} \\
 \end{array} \]
+We define \fbox{$s \sqcup s'$} by $\Set_i \sqcup \Set_j = \Set_{\max(i,j)}$.
 
-Telescopes
+Telescopes.
 \[\begin{array}{lrll}
-\Gamma , \Delta &::=& ·  & \\
+\Delta &::=& ·  & \\
       &  |& (x : T)\Delta & \\
 \end{array} \]
 
-Iterated function types $\Gamma \rightarrow T$
+Iterated function types $\Delta \rightarrow T$
 \[\begin{array}{lrll}
 · \rightarrow T &=& T &\\
 (x : U)\Delta \rightarrow T &=& (x : U) \rightarrow (\Delta \rightarrow T) & \\
@@ -266,8 +267,31 @@ Iterated function types $\Gamma \rightarrow T$
 \section{Declarations}
 \label{sec:declarations}
 
+Copattern
+\[\begin{array}{lrll}
+q &::=& @p &\\
+  &  |& .\pi \\
+\end{array} \]
+
+Pattern
+\[\begin{array}{lrll}
+p &::=& x     &  \hspace{2cm} \text{Variable pattern} \\
+    &|& c\; \bar{p}    &  \hspace{2cm} \text{Constructor pattern} \\
+    &|& .u      &  \hspace{2cm} \text{Dot pattern} \\
+\end{array} \]
+
 Declarations
-\[ \hdots \]
+\[
+\begin{array}{lrll}
+d  & ::=  & \mathit{ts} & \mbox{type signature}
+\\ & \mid & \mathit{cl} & \mbox{function clause}
+\\ & \mid & \mathit{ds} & \mbox{data signature}
+\\ & \mid & \mathit{dd} & \mbox{data definition}
+\\ & \mid & \mathit{rs} & \mbox{record signature}
+\\ & \mid & \mathit{rd} & \mbox{record definition}
+
+\end{array}
+ \]
 
 Type signatures
 \[\begin{array}{lrll}
@@ -279,42 +303,50 @@ Function clauses
 cl &::=& f\; \bar{q} = t &\\
 \end{array} \]
 
-Copattern
-\[\begin{array}{lrll}
-q &::=& @p &\\
-  &  |& .\pi \\ 
-\end{array} \]
-
-Pattern
-\[\begin{array}{lrll}
-p &::=& x     &  \hspace{2cm} \text{Variable pattern} \\
-    &|& c\; \bar{p}    &  \hspace{2cm} \text{Constructor pattern} \\
-    &|& .u      &  \hspace{2cm} \text{Dot pattern} \\
-\end{array} \]
+Data signature
+\[
+\textbf{data}\; D\; \Delta : \Delta' \rightarrow s
+\]
 
 Data definition
 \[
-\textbf{data}\; D\; \Gamma : \Delta \rightarrow s \; \textbf{where}\; \overline{c : T}
+\textbf{data}\; D\; \Delta \;\textbf{where}\; \overline{c : T}
 \]
+
+Record signature
+\[ \begin{array}{l}
+\textbf{record}\; R\; \Delta : s
+\end{array}\]
 
 Record declaration
 \[ \begin{array}{l}
-\textbf{record}\; R\; \Gamma : s \; \textbf{where} \\
+\textbf{record}\; R\; \Delta \; \textbf{where} \\
 \qquad  \textbf{constructor}\; c \\
 \qquad  \textbf{field}\; \overline{\pi : T} \\
 \end{array}\]
 
-Signature declaration
+
+
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+\newcommand{\datasig}{\text{data } D\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
+\newcommand{\recsig}{\text{record } R\;\Delta : s \text{ where
+    $c : T$; } \text{projections } \overline{\pi : T} }
+\newcommand{\funsig}{\text{function } f : T \text{ where } \overline{cl}}
+
+Signature declaration (used internally)
 \[
 \begin{array}{lcl}
-d_\Sigma & ::= & \text{data } D\Gamma: \Delta \to S \text{ where } \overline{c : T} \\
-& \| & \text{record } R\Gamma : S \text{ where constructor $c$; } \overline{\text{field }\pi : T} \\
-& \| & \text{function } f : T \text{ where } \overline{cl}
+d_\Sigma & ::= & \datasig \\
+& \| & \recsig \\
+& \| & \funsig
 \end{array}
 \]
 
 
-Signature
+Signature (used internally)
 \[
 \begin{array}{lcl}
 \Sigma & ::= &  \overline{d_\Sigma} \\
@@ -322,13 +354,11 @@ Signature
 \]
 
 
-\section{Evaluation}
-\label{sec:evaluation}
-
-Hereditary substitution
+Hereditary substitution \fbox{$u[\sigma] = v$}
+and eliminiation \fbox{$t \bang \overline{e} = v$}
 \[
 \begin{array}{lll}
-u[\sigma] = v & t \bang \overline{e} = v & t \bang \cdot = t \\
+ t \bang \cdot = t \\
 D \overline{v} \bang @ \overline{u} = D \overline{v} \overline{u}
 & R \overline{v} \bang @ \overline{u} = R \overline{v} \overline{u}
 \end{array}
@@ -366,17 +396,16 @@ D \overline{v} \bang @ \overline{u} = D \overline{v} \overline{u}
 Matching
 \[
 \begin{array}{ll}
-\overline{e}/\overline{q} = \sigma  & 
+\overline{e}/\overline{q} = \sigma  &
 \Sigma \vdash e/q = \sigma
 \end{array}
 \]
 
-Evaluation
 \[
 \begin{array}{ll}
 \inferrule{}
 {\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
-& 
+&
 \inferrule{}
 {\Sigma \vdash v/x = [v/x]} % var pat
 \\
@@ -386,9 +415,9 @@ Evaluation
 \inferrule{}
 {\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
 \\
-\inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma} 
+\inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
 {\Sigma \vdash v / c \overline{p} = \sigma} % reduce
-& 
+&
 \inferrule{v \bang \pi_i / p_i = \sigma}
 {\Sigma \vdash v / c_{\overline \pi} \overline{p} = \sigma} % record pat
 \end{array}
@@ -413,7 +442,53 @@ Weak head reduction
 \section{Typing rules}
 \label{sec:typing}
 
-Context 
+
+\subsection{Auxiliary judgements}
+
+Function type application \fbox{$T !! \vec u = U$}.
+\[
+  \ru{}{T !! . = T}
+\qquad
+  \ru{\subst u x V !! \vec u = T
+    }{\funT x U V !! u \vec u = T}
+\]
+
+% Type elimination \fbox{$\Sigma \der (t : T) !! e = U$}.
+% \[
+%   \ru{}{\Sigma \der (t : \funT x U V) !! @u = \subst u x V}
+% \qquad
+%   \ru{\Sigma \der R.\pi : U
+%     }{}
+% \]
+
+Signature lookup \fbox{$\Sigma \der z : T$}.
+\begin{gather*}
+  \ru{\funsig \in \Sigma
+    }{\Sigma \der f : T}
+\\
+  \ru{\datasig \in \Sigma
+    }{\Sigma \der D : \Delta \to \Delta' \to s}
+\qquad
+  \ru{\datasig \in \Sigma
+    }{\Sigma \der D.c_i : \Delta \to T_i}
+\\
+  \ru{\recsig \in \Sigma
+    }{\Sigma \der R : \Delta \to s}
+\\
+  \ru{\recsig \in \Sigma
+    }{\Sigma \der R.c : \Delta \to T}
+\qquad
+  \ru{\recsig \in \Sigma
+    }{\Sigma \der R.\pi_i : \Delta \to T_i}
+\end{gather*}
+
+
+
+
+\subsection{Typing judgements for expressions}
+
+
+Typing contexts.
 \[
 \begin{array}{lcl}
 \Gamma & ::= & \cdot \| \Gamma, x:T \\
@@ -421,55 +496,115 @@ Context
 \end{array}
 \]
 
-Typing 
+Well-typed contexts \fbox{$\vdash_\Sigma \Gamma$}.
 \[
-\begin{array}{ll}
-\Gamma \vdash_\Sigma t : T & \Gamma \| u: U \vdash \overline{e} : T
-\end{array}
+% Contexts
+\ru{}{\vdash_\Sigma \cdot}
+\qquad
+\inferrule
+  {\vdash_\Sigma \Gamma \qquad \Gamma \vdash_\Sigma T:s}
+  {\vdash_\Sigma \Gamma, x : T} \ x \not\in \dom(\Gamma)
 \]
 
-Conversion 
+Well-typed telescopes \fbox{$\Gamma \vdash_\Sigma \Delta$}.
 \[
-\begin{array}{ll}
-\Gamma \vdash_\Sigma t = t' : T & \Gamma \vdash_\Sigma \Delta \\
-\vdash_\Sigma \Gamma & \\
-
-% Contexts
-\inferrule{}
-{\vdash_\Sigma \cdot} & 
-\inferrule{\vdash_\Sigma \Gamma \qquad \Gamma \vdash_\Sigma T:s}
-{\vdash_\Sigma \Gamma, x : T} \qquad x \not\in \dom(\Gamma) \\
-
 % Telescopes
-\inferrule{\vdash_\Sigma \Gamma}
-{\vdash_\Sigma \cdot} &
+\inferrule
+  {\vdash_\Sigma \Gamma}
+  {\Gamma \vdash_\Sigma \cdot}
+\qquad
 \inferrule{\Gamma \vdash_\Sigma T : s \qquad \Gamma, x:T \vdash_\Sigma \Delta}
 {\Gamma \vdash_\Sigma (x:T) \Delta}
-\qquad x \in \dom{\Delta} \\
+% \qquad x \in \dom{\Delta} \\
+\]
 
-%Terms 
-\inferrule{(x:U)\in \Gamma \qquad \Gamma | x:U \vdash \overline{e}:T}
-{\Gamma \vdash x \overline{e} : T} 
-&
+Spine typing \fbox{$\Gamma \| u : U \vdash \overline{e} : T$}
+($u$ is neutral).
+\begin{gather*}
 % Check spine
-\inferrule{}
+\ru{}
 {\Gamma \| u:U \vdash \cdot : U}
 \\
-\inferrule{\Gamma \vdash u:U \qquad \Gamma \| t@u:T[u/x] \vdash \overline{e : V}}
-{\Gamma \| t : \Pi x:U.T \vdash @u \overline{e}:V}
-&
-\inferrule{ \Gamma \vdash (t:R\overline{u}).\pi = T' 
-\qquad \Gamma \| t.\pi :T' \vdash_\Sigma \overline{e}:V}
-{ \Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
+\inferrule
+  {\Gamma \vdash u:U \qquad \Gamma \| t@u:T[u/x] \vdash \overline{e} : V}
+  {\Gamma \| t : \Pi x:U.T \vdash @u \overline{e}:V}
+\qquad
+\ru{\Sigma \der R.\pi = T \qquad
+    T !! (\vec u,t) = U \qquad
+    \Gamma \| t.\pi : U \vdash_\Sigma \overline{e} : V
+  }{\Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e} : V}
+% \inferrule{ \Gamma \vdash (t:R\overline{u}).\pi = T'
+% \qquad \Gamma \| t.\pi :T' \vdash_\Sigma \overline{e}:V}
+% { \Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
+% \\
+% \Sigma \vdash (t:R\overline{u}).\pi = T
+% \\
+% (t: \Sigma x:A.B).\proj_2 = B[t.\proj_1/x] &
+% \\
+% \inferrule{T[u/x] \twobang \overline{e} = v}
+% {(\Pi x:U.T) \twobang @ u \overline{e} = v}
 \\
-\Sigma \vdash (t:R\overline{u}).\pi = T
+\ru{\Gamma \mid u : U \vdash \vec e : V \qquad
+    \Gamma \der U = U' : s
+  }{\Gamma \mid u : U' \vdash \vec e : V}
+\end{gather*}
+
+
+Term typing \fbox{$\Gamma \vdash_\Sigma t : T$}
+\begin{gather*}
+\inferrule
+  {(x:U)\in \Gamma \qquad \Gamma \mid x:U \vdash \overline{e}:T}
+  {\Gamma \vdash x \overline{e} : T}
+\qquad
+\ru{\Sigma \vdash f : T \qquad
+    \Gamma \mid f : T \vdash_\Sigma \vec e : V
+   }{\Gamma \der_\Sigma f \vec e : V}
 \\
-(t: \Sigma x:A.B).\proj_2 = B[t.\proj_1/x] &
+\ru{\Sigma \der D.c : T \qquad
+    T !! \vec u = T' \qquad
+    \Gamma \mid c : T' \der_\Sigma \vec v : D \, \vec u \, \vec t
+  }{\Gamma \der_\Sigma c\,\vec v : D\,\vec u\,\vec t}
+\qquad
+\ru{\Sigma \vdash z : T \qquad
+    \Gamma \mid z : T \vdash_\Sigma \vec u : V
+   }{\Gamma \der_\Sigma z \, \vec u : V} \ z ::= D \mid R
 \\
-\inferrule{T[u/x] \twobang \overline{e} = v}
-{(\Pi x:U.T) \twobang @ u \overline{e} = v}
-\end{array}
-\]
+\ru{\Gamma, x \of U \der_\Sigma v : V
+  }{\Gamma \der_\Sigma \lambda x.v : \funT x U V}
+\qquad
+\ru{\Gamma \der U : s \qquad
+    \Gamma, x \of U \der V : s'
+  }{\Gamma \der \piT x U V : s \sqcup s'}
+\end{gather*}
+
+
+Conversion
+\fbox{$\Gamma \vdash_\Sigma t = t' : T$}\ .
+\begin{gather*}
+%
+\ru{\Sigma \der t \red t' \qquad
+    \Gamma \ders t : T \qquad
+    \Gamma \ders t' : T
+  }{\Gamma \ders t = t' : T}
+\\
+\ru{\Gamma \ders t : \funT x U V
+  }{\Gamma \ders t = \lambda x. t\, x : \funT x U V}
+\qquad
+\ru{\Gamma \ders t : R\, \vec u \qquad
+    \Sigma \der R.\cpi : T
+  }{\Gamma \ders t = \cpi\,\overline{t .\pi} : R\,\vec u}
+\\
+\end{gather*}
+And many boring rules (equivalence, congruence)
+and rules for elimination equality
+\fbox{\Gamma \mid t : T \ders \vec e = \vec e' : V}
+
+
+\subsection{Declaration typing}
+
+
+
+
 
 
 \section{Coverage}
@@ -499,7 +634,7 @@ Record declaration
 \begin{verbatim}
 rd ::= field π : T
      | ts
-     | cl 
+     | cl
 \end{verbatim}
 
 
