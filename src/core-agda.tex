@@ -336,9 +336,10 @@ Record declaration
     $c : T$; } \text{projections } \overline{\pi : T} }
 \newcommand{\funsig}{\text{function } f : T \text{ where } \overline{cl}}
 
-Signature declaration (used internally)
+A signature is a list of signature declarations (used internally).
 \[
 \begin{array}{lcl}
+\Sigma & ::= &  \overline{d_\Sigma} \\
 d_\Sigma & ::= & \datasig \\
 & \| & \recsig \\
 & \| & \funsig
@@ -346,95 +347,119 @@ d_\Sigma & ::= & \datasig \\
 \]
 
 
-Signature (used internally)
-\[
-\begin{array}{lcl}
-\Sigma & ::= &  \overline{d_\Sigma} \\
-\end{array}
-\]
-
-
 Hereditary substitution \fbox{$u[\sigma] = v$}
-and eliminiation \fbox{$t \bang \overline{e} = v$}
+and elimination \fbox{$t \bang \overline{e} = v$}\ .
+\begin{gather*}
+\inferrule
+  {\sigma(x) \bang \overline{e}[\sigma] = v}
+  {x \overline{e}[\sigma] = v}
+\qquad
+\inferrule
+  {\overline{e}[\sigma] = \overline{e}'}
+  {f \overline{e}[\sigma] = f \overline{e}'}
+\qquad
+\cdots
+\end{gather*}
+\begin{gather*}
+\inferrule
+  { v[u/x] \bang \overline{e} = v'}
+  {\lambda x.v \bang @u \overline{e} = v'}
+\qquad
+\inferrule
+  {v_i ! \overline{e} = v'}
+  {\cpi \overline{v} \bang .\pi_i \overline{e} = v'}
+\\
+\ru{}{t \bang \cdot = t}
+\qquad
+\ru{}{x \overline{e} \bang \overline{e}' = x \overline{e}
+  \overline{e}'}
+\qquad
+\ru{}{f \overline{e} \bang \overline{e}' = f \overline{e} \overline{e}'}
+\qquad
+\ru{}{z \overline{v} \bang @ \overline{u} = z \overline{v}
+  \overline{u}}\ z ::= c \mid D \mid R
+% \qquad
+% \ru{}{D \overline{v} \bang @ \overline{u} = D \overline{v}
+%   \overline{u}}
+% \qquad
+% \ru{}{R \overline{v} \bang @ \overline{u} = R \overline{v} \overline{u}}
+\end{gather*}
+% \[
+% \[
+% \begin{array}{ll}
+% &
+% \\
+% &
+% \\
+% \inferrule{c \overline{v} u \bang \overline{e} = v'}
+% {\overline{v} \bang @u \overline{e} = v'}
+% &
+% \\
+% &
+% \text{ everything else undefined }
+% \end{array}
+% \]
+
+
+
+Matching \fbox{$\Sigma \vdash e/q = \sigma$}\ .
+\begin{gather*}
+\ru{}{\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
+\qquad
+\ru{}{\Sigma \vdash v/x = [v/x]} % var pat
+\qquad
+\ru
+  {\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
+  {\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
+\qquad
+\ru{v \bang \pi_i / p_i = \sigma}
+{\Sigma \vdash v / \cpi \overline{p} = \sigma} % record pat
+\qquad
+\ru{}{\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
+\\
+\ru{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
+{\Sigma \vdash v / c \overline{p} = \sigma} % reduce
+\end{gather*}
+% \[
+% \begin{array}{ll}
+% \overline{e}/\overline{q} = \sigma  &
+% \Sigma \vdash e/q = \sigma
+% \end{array}
+% \]
+
+% \[
+% \begin{array}{ll}
+% \inferrule{}
+% {\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
+% &
+% \inferrule{}
+% {\Sigma \vdash v/x = [v/x]} % var pat
+% \\
+% \inferrule{\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
+% {\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
+% &
+% \inferrule{}
+% {\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
+% \\
+% \inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
+% {\Sigma \vdash v / c \overline{p} = \sigma} % reduce
+% &
+% \inferrule{v \bang \pi_i / p_i = \sigma}
+% {\Sigma \vdash v / c_{\overline \pi} \overline{p} = \sigma} % record pat
+% \end{array}
+% \]
+
+Weak head reduction \fbox{$\Sigma \vdash t \to t'$}
 \[
 \begin{array}{lll}
- t \bang \cdot = t \\
-D \overline{v} \bang @ \overline{u} = D \overline{v} \overline{u}
-& R \overline{v} \bang @ \overline{u} = R \overline{v} \overline{u}
-\end{array}
-\]
-
-\[
-\begin{array}{ll}
-\inferrule{\sigma(x) \bang \overline{e}[\sigma] = v}
-{x \overline{e}[\sigma] = v}
-&
-\inferrule{\overline{e}[\sigma] = \overline{e}'}
-{f \overline{e}[\sigma] = f \overline{e}'}
-\\
-\inferrule{ v[u/x] \bang \overline{e} = v'}
-{\lambda x.v \bang @u \overline{e} = v'}
-&
-\inferrule{v_i ! \overline{e} = v'}
-{c_{\overline{pi}} \overline{v} \bang .\pi_i \overline{e} = v'}
-\\
-\inferrule{c \overline{v} u \bang \overline{e} = v'}
-{\overline{v} \bang @u \overline{e} = v'}
-&
-\inferrule{}
-{f \overline{e} \bang \overline{e}' = f \overline{e} \overline{e}'}
-\\
-\inferrule{}
-{x \overline{e} \bang \overline{e}' = x \overline{e} \overline{e}'}
-&
-\text{ everything else undefined }
-\end{array}
-\]
-
-
-
-Matching
-\[
-\begin{array}{ll}
-\overline{e}/\overline{q} = \sigma  &
-\Sigma \vdash e/q = \sigma
-\end{array}
-\]
-
-\[
-\begin{array}{ll}
-\inferrule{}
-{\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
-&
-\inferrule{}
-{\Sigma \vdash v/x = [v/x]} % var pat
-\\
-\inferrule{\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
-{\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
-&
-\inferrule{}
-{\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
-\\
-\inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
-{\Sigma \vdash v / c \overline{p} = \sigma} % reduce
-&
-\inferrule{v \bang \pi_i / p_i = \sigma}
-{\Sigma \vdash v / c_{\overline \pi} \overline{p} = \sigma} % record pat
-\end{array}
-\]
-
-Weak head reduction
-\[
-\begin{array}{ll}
-\Sigma \vdash t \to t' &
 \inferrule{f \overline q = t \in \Sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma}
 {\Sigma \vdash f \overline{e} \overline{e}' \to t[\sigma] \bang \overline{e}'}
-\\
-\inferrule{\Sigma \vdash e/q = \sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma'}
-{\Sigma \vdash e, \overline{e}/q, \overline{q} = \sigma \overset{\cup}{+} \sigma'}%patterns
 &
-\inferrule{}
+\ru{}
 {\Sigma \vdash \cdot/\cdot = \cdot} %empty
+&
+\inferrule{\Sigma \vdash e/q = \sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma'}
+{\Sigma \vdash e, \overline{e}/q, \overline{q} = \sigma \uplus \sigma'}%patterns
 \end{array}
 \]
 
@@ -597,7 +622,7 @@ Conversion
 \end{gather*}
 And many boring rules (equivalence, congruence)
 and rules for elimination equality
-\fbox{\Gamma \mid t : T \ders \vec e = \vec e' : V}
+\fbox{$\Gamma \mid t : T \ders \vec e = \vec e' : V$}
 
 
 \subsection{Declaration typing}
