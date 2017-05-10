@@ -627,6 +627,80 @@ and rules for elimination equality
 
 \subsection{Declaration typing}
 
+(Co)pattern variables \fbox{$PV(p) = \bar{x}$}
+\begin{gather*}
+PV(x) = \{ x \} \qquad PV (\lceil v \rceil) = \emptyset \qquad PV(c\; \bar{p}) = PV(\bar{p}) \\
+PV(\bar{p}) = \biguplus_i PV(p_i) \\
+PV(.\pi) = \emptyset \qquad PV(@p) = PV(p) \\
+PV(\bar{q}) = \biguplus_i PV(q_i) \\
+\end{gather*}
+
+
+Embedding of (co)patterns into terms \fbox{$\lceil p \rceil = t$}
+\begin{gather*}
+\lceil x \rceil = x \qquad
+\lceil \lfloor v \rfloor \rceil = v \qquad
+\lceil c\; \bar{p} \rceil = c\; \lceil \bar{p} \rceil \\
+\lceil .\pi \rceil = .\pi \qquad
+\lceil @p \rceil = @ \lceil p \rceil
+\end{gather*}
+
+
+%Pattern typing \fbox{$\Gamma \ders p : U \leadsto \Gamma'$}
+%\begin{gather*}
+%\ru{\Gamma \ders U : s}
+%   {\Gamma \ders x : U \leadsto (x : U)} x \not\in dom(\Gamma) \\
+%\ru{\Sigma \der D.c : T \qquad T!!\bar{u} = T' \qquad \Gamma \| c : T \ders @\bar{p} : D\; \bar{u}\; \bar{v} \leadsto \Gamma'}
+%   {\Gamma  \ders c\; \bar{p} : D\; \bar{u}\; \bar{v} \leadsto \Gamma'}
+%\end{gather*}
+%
+%
+%Copattern typing \fbox{$\Gamma \| f : T \ders \bar{q} : U \leadsto \Gamma'$}
+%\begin{gather*}
+%\ru{\Gamma \vdash p : U \leadsto \Gamma_1 \qquad \Gamma,\Gamma' | h\; @p : V[p/x] \ders \bar{q} : T  \leadsto \Gamma_2}
+%   {\Gamma \| h : \piT x U V \ders @p\; \bar{q} : T \leadsto \Gamma_1 , \Gamma_2}
+%\end{gather*}
+
+Clause typing \fbox{$f : T \ders cl$}
+\begin{gather*}
+\ru{PV(\bar{q}) = dom(\Gamma) \qquad
+    \Gamma | f : T \ders \lceil \bar{q} \rceil : U \qquad
+    \Gamma \ders t : U}
+   {f : T \ders f\; \bar{q} = t}
+\end{gather*}
+
+Constructor typing \fbox{$\Delta | U : \Delta' \rightarrow s \ders c : T$}
+\begin{gather*}
+\ru{\Delta \ders \Gamma \rightarrow T : s \qquad
+    \Delta,\Gamma \ders \bar{v} : \Delta' \qquad
+    \Delta,\Gamma \ders T = U\; \bar{v} : s}
+   {\Delta | U : \Delta' \rightarrow s \ders c : \Gamma \rightarrow T}
+\end{gather*}
+
+% TODO: add syntax for lone declarations without a definition (i.e. with no 'where').
+Declaration typing \fbox{$\Sigma \der d \leadsto \Sigma'$}
+\begin{gather*}
+\ru{f \not\in \Sigma \qquad \cdot \ders T : s}
+   {\Sigma \der f : T \leadsto \Sigma, function\; f : T\; where\; \cdot}
+\\
+\ru{\forall i.\; f : T \ders cl_i}
+   {\Sigma[function\; f : T\; where\; \cdot] \der \overline{cl} \leadsto \Sigma[function\; f : T\; where\; \overline{cl}]}
+\\
+\ru{D \not\in \Sigma \qquad \ders \Delta \qquad \Delta \ders \Delta'}
+   {\Sigma \der data\; D\; \Delta : \Delta' \rightarrow s \leadsto \Sigma, data\; D\; \Delta : \Delta' \rightarrow s}
+\\
+\ru{\forall i.\; \Delta | D\; \Delta : \Delta' \rightarrow s \vdash c_i : T_i}
+   {\Sigma[data\; D\; \Delta : \Delta' \rightarrow s] \ders data\; D\; \Delta\; where\; \overline{c : T} \leadsto \Sigma[data\; D\; \Delta : \Delta' \rightarrow s\; where\; \overline{c : T}]}
+\\
+\ru{R \not\in \Sigma \qquad \ders \Delta}
+   {\Sigma \ders record\; R \; \Delta : s \leadsto \Sigma, record\; R\; \Delta : s}
+\\
+\ru{\Delta \ders \overline{(\hat{\pi} : T)} \rightarrow R\; \Delta : s \qquad
+    U_i = \Delta \rightarrow (x : R\; \Delta) \rightarrow T_i[x.\pi_j / \hat{\pi_j}] }
+   {\Sigma[record\; R\; \Delta : s] \ders record\; R\; \Delta\; where\; constructor\; c, \overline{field\; \hat{\pi} : T} \\  \leadsto \Sigma[record\; R\; \Delta : s\; where\; c : \Delta \rightarrow \overline{(\pi : T)} \rightarrow R\; \Delta; projections\; \overline{\pi : U}]} x \not\in dom(\Delta)
+\end{gather*}
+
+
 
 
 

@@ -83,7 +83,7 @@
 % Inference rules
 \newcommand{\rulename}[1]{\ensuremath{\mbox{\sc#1}}}
 \newcommand{\rul}[2]{\dfrac{\begin{array}[b]{@{}l@{}} #1 \end{array}}{#2}}
-\newcommand{\ru}[2]{\dfrac{\begin{array}[b]{@{}c@{}} #1 \end{array}}{#2}}
+\newcommand{\ru}[2]{\dfrac{\begin{array}[b]{@{}c@{}} #1 \end{array}}{\begin{array}[l]{@{}c@{}} #2 \end{array}}}
 \newcommand{\rux}[3]{\ru{#1}{#2}\ #3}
 \newcommand{\nru}[3]{#1\ \ru{#2}{#3}}
 \newcommand{\nrux}[4]{#1\ \ru{#2}{#3}\ #4}
