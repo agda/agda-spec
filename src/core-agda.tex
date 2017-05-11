@@ -1,4 +1,4 @@
-\documentclass[acmlarge]{acmart}\settopmatter{}
+\documentclass[acmlarge,fleqn]{acmart}\settopmatter{}
 
 %% Note: Authors migrating a paper from PACMPL format to traditional
 %% SIGPLAN proceedings format should change 'acmlarge' to
@@ -64,6 +64,17 @@
 
 \input{macros}
 
+% COVERED by option fleqn:
+%
+% controlling flushleft/center for math displays
+% http://www.golatex.de/wechsel-zwischen-leqno-und-reqno-fleqn-uvm-t2488.html
+\makeatletter
+%\def\leqn{\tagsleft@true}
+%\def\reqn{\tagsleft@false}
+\def\fleq{\@fleqntrue\let\mathindent\@mathmargin \@mathmargin=\leftmargini}
+\def\cneq{\@fleqnfalse}
+\g@addto@macro{\endsubequations}{\addtocounter{equation}{-1}}
+\makeatother
 
 \begin{document}
 
@@ -201,64 +212,81 @@ the core components of Agda.
 
 \newcommand{\bang}{\,!\,}
 \newcommand{\twobang}{\,!!\,}
+\newcommand{\dotp}[1]{\lfloor#1\rfloor}
 
+\subsection{Terms}
 
-Names
+We distinguish global names $f,F,D,c,R,\pi$ bound in the signature $\Sigma$ from
+local variables $x,y,z$ bound in typing contexts $\Gamma$.  Local
+variables are represented by de Bruijn indices in the implementation,
+but for the sake of readability we stick to a named presentation here.
+
+For orientation of the reader, we use different letters to represent
+different purposes of global names.  However, they share the same name
+space and are not distinguished syntactically.
 \[
-\begin{array}{ll}
-  F & \hspace{2cm}\text{Datatype / Record name} \\
-  f & \hspace{2cm}\text{   Function name} \\
-\pi & \hspace{2cm}\text{  Projection name  (overloaded)} \\
-  c & \hspace{2cm}\text{   Data/Record constructor name (overloaded)} \\
+\begin{array}{l@{\hspace{2cm}}l}
+  D & \text{data type name} \\
+  R & \text{record type name} \\
+  F & \text{data type or record type name} \\
+  f & \text{function name} \\
+\pi & \text{projection name  (overloaded)} \\
+  c & \text{data/record constructor name (overloaded)} \\
 \end{array}
 \]
+Projection and constructor names can be overloaded and are resolved by
+the type checker.  We write $R.\pi$ for a resolved record projection
+name, $R.c$ for a resolved record constructor name and $D.c$ for a
+resolved data constructor name.
 
-Variables (represented by a de Bruijn-index)
-\[
-x,y,z, \hdots
-\]
-
-Terms ($\beta$-normal).
+Terms use a spine form for eliminations and thus are kept $\beta$ and
+projection normal form.  This means that terms cannot be a
+$\beta$-redex $(\lambda x.\,v)\,u$ nor a projection of a record value
+$\cpi\,\vec v\,.\pi$.
 \[
 \begin{array}{lrl@{\hspace{2cm}}l}
-t, u, v &::=& x\; \bar{e}            & \text{Variables (eliminated by $\bar{e}$)} \\
-          &|& c\; \bar{v}            & \text{Data constructor applied to arguments $\bar{v}$} \\
-          &|& \cpi\; \bar{v}         & \text{Record constructor applied to arguments $\bar{v}$} \\
-          &|& f\; \bar{e}            & \text{Defined function (eliminated by $\bar{e}$), includes postulates} \\
-          &|& \lambda x.\, v         & \text{Lambda abstraction} \\
-          &|& F\; \bar{v}            & \text{Data/record type} \\
-          &|& s               & \text{Sort} \\
-          &|& (x : U) \rightarrow V      & \text{Dependent function type} \\
+t, u, v
+  &::=& x\; \bar{e}      & \text{variables (eliminated by $\bar{e}$)} \\
+  & | & f\; \bar{e}      & \text{defined function (eliminated by $\bar{e}$), includes postulates} \\
+  & | & c\; \bar{v}      & \text{data constructor applied to arguments $\bar{v}$} \\
+  & | & \cpi\; \bar{v}   & \text{record constructor with fields $\vec\pi$ applied to arguments $\bar{v}$} \\
+  & | & \lambda x.\, v   & \text{lambda abstraction} \\
+  & | & F\; \bar{v}      & \text{data/record type name applied to arguments $\bar v$} \\
+  & | & \funT x U V      & \text{dependent function type} \\
+  & | & s                & \text{Sort} \\
 \end{array}
 \]
+We use uppercase letters $T,U,V$ for terms that stand for types.
 
 Eliminations.
 \[\begin{array}{lrl@{\hspace{2cm}}l}
-e &::=& @u                & \text{Application to term} \\
-    &|& .\pi               & \text{ Projection} \\
+e &::=& @u               & \text{application to term $u$} \\
+  & | & .\pi             & \text{taking projection $\pi$} \\
 \end{array} \]
 
 Sorts.
-\[\begin{array}{lrl@{\hspace{2cm}}l}
-s ::= \Set_n             &  \text{Universe of types of level $n$} \\
-\end{array} \]
+\[
+\begin{array}{lrl@{\hspace{2cm}}l}
+s & ::= & \Set_n         &  \text{universe of types of level $n \in \NN$} \\
+\end{array}
+\]
 We define \fbox{$s \sqcup s'$} by $\Set_i \sqcup \Set_j = \Set_{\max(i,j)}$.
+
+
+\subsection{Telescopes and patterns}
 
 Telescopes.
 \[\begin{array}{lrll}
-\Delta &::=& ·  & \\
-      &  |& (x : T)\Delta & \\
+\Delta &::=& \cempty       & \text{empty telescope} \\
+       &  |& (x : T)\Delta & \text{non-empty telescope; $\Delta$ can depend on $x$} \\
 \end{array} \]
 
-Iterated function types $\Delta \rightarrow T$
-\[\begin{array}{lrll}
-· \rightarrow T &=& T &\\
-(x : U)\Delta \rightarrow T &=& (x : U) \rightarrow (\Delta \rightarrow T) & \\
+Notation: iterated function types \fbox{$\Delta \to T$}, defined by recursion on $\Delta$:
+\[\begin{array}{rrll}
+\cempty \to T &=& T &\\
+(x : U)\Delta \to T &=& (x : U) \to (\Delta \to T) & \\
 \end{array} \]
 
-
-\section{Declarations}
-\label{sec:declarations}
 
 Copattern
 \[\begin{array}{lrll}
@@ -268,10 +296,13 @@ q &::=& @p &\\
 
 Pattern
 \[\begin{array}{lrl@{\hspace{2cm}}l}
-p &::=& x     &   \text{Variable pattern} \\
-    &|& c\; \bar{p}    &   \text{Constructor pattern} \\
-    &|& .u      &   \text{Dot pattern} \\
+p &::=& x              &   \text{variable pattern} \\
+    &|& c\; \bar{p}    &   \text{constructor pattern} \\
+    &|& \dotp u             &   \text{inaccessible pattern (aka dot pattern)} \\
 \end{array} \]
+
+\subsection{Declarations}
+\label{sec:declarations}
 
 Declarations
 \[
@@ -298,7 +329,7 @@ cl &::=& f\; \bar{q} = t &\\
 
 Data signature
 \[
-\textbf{data}\; F\; \Delta : \Delta' \rightarrow s
+\textbf{data}\; F\; \Delta : \Delta' \to s
 \]
 
 Data definition
@@ -662,12 +693,12 @@ Clause typing \fbox{$f : T \ders cl$}
    {f : T \ders f\; \bar{q} = t}
 \end{gather*}
 
-Constructor typing \fbox{$\Delta | U : \Delta' \rightarrow s \ders c : T$}
+Constructor typing \fbox{$\Delta | U : \Delta' \to s \ders c : T$}
 \begin{gather*}
-\ru{\Delta \ders \Gamma \rightarrow T : s \qquad
+\ru{\Delta \ders \Gamma \to T : s \qquad
     \Delta,\Gamma \ders \bar{v} : \Delta' \qquad
     \Delta,\Gamma \ders T = U\; \bar{v} : s}
-   {\Delta | U : \Delta' \rightarrow s \ders c : \Gamma \rightarrow T}
+   {\Delta | U : \Delta' \to s \ders c : \Gamma \to T}
 \end{gather*}
 
 % TODO: add syntax for lone declarations without a definition (i.e. with no 'where').
@@ -680,17 +711,17 @@ Declaration typing \fbox{$\Sigma \der d \leadsto \Sigma'$}
    {\Sigma[function\; f : T\; where\; \cdot] \der \overline{cl} \leadsto \Sigma[function\; f : T\; where\; \overline{cl}]}
 \\
 \ru{F \not\in \Sigma \qquad \ders \Delta \qquad \Delta \ders \Delta'}
-   {\Sigma \der data\; F\; \Delta : \Delta' \rightarrow s \leadsto \Sigma, data\; F\; \Delta : \Delta' \rightarrow s}
+   {\Sigma \der data\; F\; \Delta : \Delta' \to s \leadsto \Sigma, data\; F\; \Delta : \Delta' \to s}
 \\
-\ru{\forall i.\; \Delta | F\; \Delta : \Delta' \rightarrow s \vdash c_i : T_i}
-   {\Sigma[data\; F; \Delta : \Delta' \rightarrow s] \ders data\; F\; \Delta\; where\; \overline{c : T} \leadsto \Sigma[data\; F\; \Delta : \Delta' \rightarrow s\; where\; \overline{c : T}]}
+\ru{\forall i.\; \Delta | F\; \Delta : \Delta' \to s \vdash c_i : T_i}
+   {\Sigma[data\; F; \Delta : \Delta' \to s] \ders data\; F\; \Delta\; where\; \overline{c : T} \leadsto \Sigma[data\; F\; \Delta : \Delta' \to s\; where\; \overline{c : T}]}
 \\
 \ru{F \not\in \Sigma \qquad \ders \Delta}
    {\Sigma \ders record\; F \; \Delta : s \leadsto \Sigma, record\; F\; \Delta : s}
 \\
-\ru{\Delta \ders \overline{(\hat{\pi} : T)} \rightarrow F\; \Delta : s \qquad
-    U_i = \Delta \rightarrow (x : F\; \Delta) \rightarrow T_i[x.\pi_j / \hat{\pi_j}] }
-   {\Sigma[record\; F\; \Delta : s] \ders record\; F\; \Delta\; where\; constructor\; c, \overline{field\; \hat{\pi} : T} \\  \leadsto \Sigma[record\; F\; \Delta : s\; where\; c : \Delta \rightarrow \overline{(\pi : T)} \rightarrow F\; \Delta; projections\; \overline{\pi : U}]} x \not\in dom(\Delta)
+\ru{\Delta \ders \overline{(\hat{\pi} : T)} \to F\; \Delta : s \qquad
+    U_i = \Delta \to (x : F\; \Delta) \to T_i[x.\pi_j / \hat{\pi_j}] }
+   {\Sigma[record\; F\; \Delta : s] \ders record\; F\; \Delta\; where\; constructor\; c, \overline{field\; \hat{\pi} : T} \\  \leadsto \Sigma[record\; F\; \Delta : s\; where\; c : \Delta \to \overline{(\pi : T)} \to F\; \Delta; projections\; \overline{\pi : U}]} x \not\in dom(\Delta)
 \end{gather*}
 
 
