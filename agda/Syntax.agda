@@ -19,17 +19,16 @@ data Var : ℕ → Set where
 
 -- Qualified names
 
-DataName = QName  -- datatype name
-RecName  = QName  -- record name
+DRName   = QName  -- datatype / record name
 FuncName = QName  -- function name
 ProjName = QName  -- projection name (overloaded)
-ConsName = QName  -- constructor name (overloaded)
+ConsName = QName  -- datatype / record constructor name (overloaded)
 
 -- Data or record constructors
 
 data ConHead : Set where
-  dataCon : DataName → ConHead
-  recCon  : RecName → (fs : List ProjName) → ConHead
+  dataCon : DRName → ConHead
+  recCon  : DRName → (fs : List ProjName) → ConHead
 
 -- Sorts are Set₀, Set₁, ...
 
@@ -44,10 +43,10 @@ mutual
   data Term (n : ℕ) : Set where
     var : (x : Var n) (es : Elims n) → Term n
     con : (c : ConHead) (vs : Args n) → Term n
-    def : (f : QName) (es : Elims n) → Term n
+    def : (f : FuncName) (es : Elims n) → Term n
     lam : (v : Term (suc n)) → Term n
     -- Types
-    dat  : (d : QName) (vs : Args n) → Term n  -- TODO: Should we distinguish data and record names?
+    dat  : (d : DRName) (vs : Args n) → Term n
     sort : (s : Sort) → Term n
     pi   : (u : Term n) (v : Term (suc n)) → Term n
 
@@ -70,7 +69,7 @@ exTyId = pi (sort (uni 0)) (pi (var vz []) (var (vs vz) []))
 -- Looking up a field in a field-value collection
 
 -- TODO: Do we want to ensure |fs| = |vs| ?
-data LookupField {a} {A : Set a} : (fs : List QName) (vs : List A) (f : QName) (v : A) → Set where
+data LookupField {a} {A : Set a} : (fs : List ProjName) (vs : List A) (f : ProjName) (v : A) → Set where
 
   here : ∀{f fs v vs}
     → LookupField (f ∷ fs) (v ∷ vs) f v
@@ -93,41 +92,59 @@ sg : ∀{Γ} (u : Term Γ) → Substitution Γ (suc Γ)
 sg {Γ} u vz     = u
 sg {Γ} u (vs x) = var x []
 
+data All₂ {A B : Set} (R : A → B → Set) : List A → List B → Set where
+  nil  : All₂ R [] []
+  cons : ∀{x y xs ys}
+    → R x y
+    → All₂ R xs ys
+    → All₂ R (x ∷ xs) (y ∷ ys)
+
 mutual
 
   data Apply {Γ} : (t : Term Γ) (es : Elims Γ) (v : Term Γ) → Set where
 
-    beta : ∀{t t' u v es}
-      → SubstTerm (sg u) t t'
-      → Apply t' es v
-      → Apply (lam t) (apply u ∷ es) v
+    var : ∀{x es es'}
+      → Apply (var x es) es' (var x (es ++ es'))
 
     proj : ∀{ c πs vs π es u v}
       → LookupField πs vs π u
       → Apply u es v
       → Apply (con (recCon c πs) vs) (proj π ∷ es) v
 
-    var : ∀{x es es'}
-      → Apply (var x es) es' (var x (es ++ es'))
+    def : ∀{f es es'}
+      → Apply (def f es) es' (def f (es ++ es'))
 
-    con : ∀{c vs u es v}
-      → Apply (con c (vs ∷ʳ u)) es v
-      → Apply (con c vs) (apply u ∷ es) v
+    lam : ∀{t t' u v es}
+      → SubstTerm (sg u) t t'
+      → Apply t' es v
+      → Apply (lam t) (apply u ∷ es) v
 
     -- TODO: congruences
 
   data SubstTerm {Γ Δ} (σ : Substitution Γ Δ) : Term Δ → Term Γ → Set where
 
     var : ∀{x : Var Δ} {es : Elims Δ} {v : Term Γ} {es' : Elims Γ}
-      → SubstElims σ es es'
+      → All₂ (SubstElim σ) es es'
       → Apply (σ x) es' v
       → SubstTerm σ (var x es) v
 
-  data SubstElim {Γ Δ} (σ : Substitution Γ Δ) : Elim Δ → Elim Γ → Set where
+    con : ∀{c : ConHead} {vs : Args Δ} {vs' : Args Γ} 
+      → All₂ (SubstTerm σ) vs vs'
+      → SubstTerm σ (con c vs) (con c vs')
 
-  data SubstElims {Γ Δ} (σ : Substitution Γ Δ) : Elims Δ → Elims Γ → Set where
-    nil  : SubstElims σ [] []
-    cons : ∀{e es e' es'}
-      → SubstElim σ e e'
-      → SubstElims σ es es'
-      → SubstElims σ (e ∷ es) (e' ∷ es')
+    def : ∀{f : FuncName} {es : Elims Δ} {es' : Elims Γ}
+      → All₂ (SubstElim σ) es es'
+      → SubstTerm σ (def f es) (def f es')
+
+--    lam : ∀{v : Term (suc Δ)}
+--      → All₂ (SubstElim σ) es es'
+--      → SubstTerm σ (def f es) (def f es')
+
+    dat : ∀{d : DRName} {vs : Args Δ} {vs' : Args Γ} 
+      → All₂ (SubstTerm σ) vs vs'
+      → SubstTerm σ (dat d vs) (dat d vs')
+
+    sort : ∀{s : Sort}
+      → SubstTerm σ (sort s) (sort s)
+
+  data SubstElim {Γ Δ} (σ : Substitution Γ Δ) : Elim Δ → Elim Γ → Set where
