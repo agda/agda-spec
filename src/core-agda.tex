@@ -206,11 +206,10 @@ the core components of Agda.
 Names
 \[
 \begin{array}{ll}
-D   & \hspace{2cm}\text{Datatype name} \\
-  R & \hspace{2cm}\text{   Record type name} \\
+  F & \hspace{2cm}\text{Datatype / Record name} \\
   f & \hspace{2cm}\text{   Function name} \\
 \pi & \hspace{2cm}\text{  Projection name  (overloaded)} \\
-  c & \hspace{2cm}\text{   Constructor name (overloaded)} \\
+  c & \hspace{2cm}\text{   Data/Record constructor name (overloaded)} \\
 \end{array}
 \]
 
@@ -219,20 +218,14 @@ Variables (represented by a de Bruijn-index)
 x,y,z, \hdots
 \]
 
-Data/record type name
-\[
-\begin{array}{lrl}
-F &::= & D \\& |& R
-\end{array}
-\]
-
 Terms ($\beta$-normal).
 \[
 \begin{array}{lrll}
 t, u, v &::=& x\; \bar{e}            & \hspace{2cm}\text{Variables (eliminated by $\bar{e}$)} \\
-          &|& c\; \bar{v}            & \hspace{2cm}\text{Constructor applied to arguments $\bar{v}$} \\
+          &|& c\; \bar{v}            & \hspace{2cm}\text{Data constructor applied to arguments $\bar{v}$} \\
+          &|& \cpi\; \bar{v}         & \hspace{2cm}\text{Recod constructor applied to arguments $\bar{v}$} \\
           &|& f\; \bar{e}            & \hspace{2cm}\text{Defined function (eliminated by $\bar{e}$), includes postulates} \\
-          &|& \lambda x.\, v           & \hspace{2cm}\text{Lambda abstraction} \\
+          &|& \lambda x.\, v         & \hspace{2cm}\text{Lambda abstraction} \\
           &|& F\; \bar{v}            & \hspace{2cm}\text{Data/record type} \\
           &|& s               & \hspace{2cm}\text{Sort} \\
           &|& (x : U) \rightarrow V      & \hspace{2cm}\text{Dependent function type} \\
@@ -305,22 +298,22 @@ cl &::=& f\; \bar{q} = t &\\
 
 Data signature
 \[
-\textbf{data}\; D\; \Delta : \Delta' \rightarrow s
+\textbf{data}\; F\; \Delta : \Delta' \rightarrow s
 \]
 
 Data definition
 \[
-\textbf{data}\; D\; \Delta \;\textbf{where}\; \overline{c : T}
+\textbf{data}\; F\; \Delta \;\textbf{where}\; \overline{c : T}
 \]
 
 Record signature
 \[ \begin{array}{l}
-\textbf{record}\; R\; \Delta : s
+\textbf{record}\; F\; \Delta : s
 \end{array}\]
 
 Record declaration
 \[ \begin{array}{l}
-\textbf{record}\; R\; \Delta \; \textbf{where} \\
+\textbf{record}\; F\; \Delta \; \textbf{where} \\
 \qquad  \textbf{constructor}\; c \\
 \qquad  \textbf{field}\; \overline{\pi : T} \\
 \end{array}\]
@@ -331,8 +324,8 @@ Record declaration
 \section{Evaluation}
 \label{sec:evaluation}
 
-\newcommand{\datasig}{\text{data } D\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
-\newcommand{\recsig}{\text{record } R\;\Delta : s \text{ where
+\newcommand{\datasig}{\text{data } F\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
+\newcommand{\recsig}{\text{record } F\;\Delta : s \text{ where
     $c : T$; } \text{projections } \overline{\pi : T} }
 \newcommand{\funsig}{\text{function } f : T \text{ where } \overline{cl}}
 
@@ -377,7 +370,7 @@ and elimination \fbox{$t \bang \overline{e} = v$}\ .
 \ru{}{f \overline{e} \bang \overline{e}' = f \overline{e} \overline{e}'}
 \qquad
 \ru{}{z \overline{v} \bang @ \overline{u} = z \overline{v}
-  \overline{u}}\ z ::= c \mid D \mid R
+  \overline{u}}\ z ::= c \mid F
 % \qquad
 % \ru{}{D \overline{v} \bang @ \overline{u} = D \overline{v}
 %   \overline{u}}
@@ -482,7 +475,7 @@ Function type application \fbox{$T !! \vec u = U$}.
 % \[
 %   \ru{}{\Sigma \der (t : \funT x U V) !! @u = \subst u x V}
 % \qquad
-%   \ru{\Sigma \der R.\pi : U
+%   \ru{\Sigma \der F.\pi : U
 %     }{}
 % \]
 
@@ -492,19 +485,19 @@ Signature lookup \fbox{$\Sigma \der z : T$}.
     }{\Sigma \der f : T}
 \\
   \ru{\datasig \in \Sigma
-    }{\Sigma \der D : \Delta \to \Delta' \to s}
+    }{\Sigma \der F : \Delta \to \Delta' \to s}
 \qquad
   \ru{\datasig \in \Sigma
-    }{\Sigma \der D.c_i : \Delta \to T_i}
+    }{\Sigma \der F.c_i : \Delta \to T_i}
 \\
   \ru{\recsig \in \Sigma
-    }{\Sigma \der R : \Delta \to s}
+    }{\Sigma \der F : \Delta \to s}
 \\
   \ru{\recsig \in \Sigma
-    }{\Sigma \der R.c : \Delta \to T}
+    }{\Sigma \der F.c : \Delta \to T}
 \qquad
   \ru{\recsig \in \Sigma
-    }{\Sigma \der R.\pi_i : \Delta \to T_i}
+    }{\Sigma \der F.\pi_i : \Delta \to T_i}
 \end{gather*}
 
 
@@ -554,10 +547,10 @@ Spine typing \fbox{$\Gamma \| u : U \vdash \overline{e} : T$}
   {\Gamma \vdash u:U \qquad \Gamma \| t@u:T[u/x] \vdash \overline{e} : V}
   {\Gamma \| t : \Pi x:U.T \vdash @u \overline{e}:V}
 \qquad
-\ru{\Sigma \der R.\pi = T \qquad
+\ru{\Sigma \der F.\pi = T \qquad
     T !! (\vec u,t) = U \qquad
     \Gamma \| t.\pi : U \vdash_\Sigma \overline{e} : V
-  }{\Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e} : V}
+  }{\Gamma \| t :  F\overline{u}  \vdash_\Sigma .\pi \overline{e} : V}
 % \inferrule{ \Gamma \vdash (t:R\overline{u}).\pi = T'
 % \qquad \Gamma \| t.\pi :T' \vdash_\Sigma \overline{e}:V}
 % { \Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
@@ -585,14 +578,14 @@ Term typing \fbox{$\Gamma \vdash_\Sigma t : T$}
     \Gamma \mid f : T \vdash_\Sigma \vec e : V
    }{\Gamma \der_\Sigma f \vec e : V}
 \\
-\ru{\Sigma \der D.c : T \qquad
+\ru{\Sigma \der F.c : T \qquad
     T !! \vec u = T' \qquad
-    \Gamma \mid c : T' \der_\Sigma \vec v : D \, \vec u \, \vec t
-  }{\Gamma \der_\Sigma c\,\vec v : D\,\vec u\,\vec t}
+    \Gamma \mid c : T' \der_\Sigma \vec v : F \, \vec u \, \vec t
+  }{\Gamma \der_\Sigma c\,\vec v : F\,\vec u\,\vec t}
 \qquad
 \ru{\Sigma \vdash z : T \qquad
     \Gamma \mid z : T \vdash_\Sigma \vec u : V
-   }{\Gamma \der_\Sigma z \, \vec u : V} \ z ::= D \mid R
+   }{\Gamma \der_\Sigma z \, \vec u : V} \ z ::= F
 \\
 \ru{\Gamma, x \of U \der_\Sigma v : V
   }{\Gamma \der_\Sigma \lambda x.v : \funT x U V}
@@ -615,9 +608,9 @@ Conversion
 \ru{\Gamma \ders t : \funT x U V
   }{\Gamma \ders t = \lambda x. t\, x : \funT x U V}
 \qquad
-\ru{\Gamma \ders t : R\, \vec u \qquad
-    \Sigma \der R.\cpi : T
-  }{\Gamma \ders t = \cpi\,\overline{t .\pi} : R\,\vec u}
+\ru{\Gamma \ders t : F\, \vec u \qquad
+    \Sigma \der F.\cpi : T
+  }{\Gamma \ders t = \cpi\,\overline{t .\pi} : F\,\vec u}
 \\
 \end{gather*}
 And many boring rules (equivalence, congruence)
@@ -686,18 +679,18 @@ Declaration typing \fbox{$\Sigma \der d \leadsto \Sigma'$}
 \ru{\forall i.\; f : T \ders cl_i}
    {\Sigma[function\; f : T\; where\; \cdot] \der \overline{cl} \leadsto \Sigma[function\; f : T\; where\; \overline{cl}]}
 \\
-\ru{D \not\in \Sigma \qquad \ders \Delta \qquad \Delta \ders \Delta'}
-   {\Sigma \der data\; D\; \Delta : \Delta' \rightarrow s \leadsto \Sigma, data\; D\; \Delta : \Delta' \rightarrow s}
+\ru{F \not\in \Sigma \qquad \ders \Delta \qquad \Delta \ders \Delta'}
+   {\Sigma \der data\; F\; \Delta : \Delta' \rightarrow s \leadsto \Sigma, data\; F\; \Delta : \Delta' \rightarrow s}
 \\
-\ru{\forall i.\; \Delta | D\; \Delta : \Delta' \rightarrow s \vdash c_i : T_i}
-   {\Sigma[data\; D\; \Delta : \Delta' \rightarrow s] \ders data\; D\; \Delta\; where\; \overline{c : T} \leadsto \Sigma[data\; D\; \Delta : \Delta' \rightarrow s\; where\; \overline{c : T}]}
+\ru{\forall i.\; \Delta | F\; \Delta : \Delta' \rightarrow s \vdash c_i : T_i}
+   {\Sigma[data\; F; \Delta : \Delta' \rightarrow s] \ders data\; F\; \Delta\; where\; \overline{c : T} \leadsto \Sigma[data\; F\; \Delta : \Delta' \rightarrow s\; where\; \overline{c : T}]}
 \\
-\ru{R \not\in \Sigma \qquad \ders \Delta}
-   {\Sigma \ders record\; R \; \Delta : s \leadsto \Sigma, record\; R\; \Delta : s}
+\ru{F \not\in \Sigma \qquad \ders \Delta}
+   {\Sigma \ders record\; F \; \Delta : s \leadsto \Sigma, record\; F\; \Delta : s}
 \\
-\ru{\Delta \ders \overline{(\hat{\pi} : T)} \rightarrow R\; \Delta : s \qquad
-    U_i = \Delta \rightarrow (x : R\; \Delta) \rightarrow T_i[x.\pi_j / \hat{\pi_j}] }
-   {\Sigma[record\; R\; \Delta : s] \ders record\; R\; \Delta\; where\; constructor\; c, \overline{field\; \hat{\pi} : T} \\  \leadsto \Sigma[record\; R\; \Delta : s\; where\; c : \Delta \rightarrow \overline{(\pi : T)} \rightarrow R\; \Delta; projections\; \overline{\pi : U}]} x \not\in dom(\Delta)
+\ru{\Delta \ders \overline{(\hat{\pi} : T)} \rightarrow F\; \Delta : s \qquad
+    U_i = \Delta \rightarrow (x : F\; \Delta) \rightarrow T_i[x.\pi_j / \hat{\pi_j}] }
+   {\Sigma[record\; F\; \Delta : s] \ders record\; F\; \Delta\; where\; constructor\; c, \overline{field\; \hat{\pi} : T} \\  \leadsto \Sigma[record\; F\; \Delta : s\; where\; c : \Delta \rightarrow \overline{(\pi : T)} \rightarrow F\; \Delta; projections\; \overline{\pi : U}]} x \not\in dom(\Delta)
 \end{gather*}
 
 
@@ -722,7 +715,7 @@ Declaration typing \fbox{$\Sigma \der d \leadsto \Sigma'$}
 
 Record types
 \begin{verbatim}
-record R Γ : s where
+record F Γ : s where
   [constructor c]
   [(co)inductive]
   [(no-)eta-equality]
@@ -743,7 +736,7 @@ rd ::= field π : T
   %% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
   %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
   %% acknowledge financial support and will be used by metadata
-  %% extraction tools.
+  % extraction tools.
   This material is based upon work supported by the
   \grantsponsor{GS100000001}{National Science
     Foundation}{http://dx.doi.org/10.13039/100000001} under Grant

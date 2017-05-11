@@ -19,13 +19,17 @@ data Var : ℕ → Set where
 
 -- Qualified names
 
-Proj = QName  -- projection names
+DataName = QName  -- datatype name
+RecName  = QName  -- record name
+FuncName = QName  -- function name
+ProjName = QName  -- projection name (overloaded)
+ConsName = QName  -- constructor name (overloaded)
 
 -- Data or record constructors
 
 data ConHead : Set where
-  dataCon : (c : QName) → ConHead
-  recCon  : (c : QName) (fs : List Proj) → ConHead
+  dataCon : DataName → ConHead
+  recCon  : RecName → (fs : List ProjName) → ConHead
 
 -- Sorts are Set₀, Set₁, ...
 
@@ -39,17 +43,17 @@ mutual
 
   data Term (n : ℕ) : Set where
     var : (x : Var n) (es : Elims n) → Term n
-    def : (f : QName) (es : Elims n) → Term n
     con : (c : ConHead) (vs : Args n) → Term n
+    def : (f : QName) (es : Elims n) → Term n
     lam : (v : Term (suc n)) → Term n
     -- Types
-    dat : (d : QName)   (vs : Args n) → Term n
-    pi  : (u : Term n) (v : Term (suc n)) → Term n
+    dat  : (d : QName) (vs : Args n) → Term n  -- TODO: Should we distinguish data and record names?
     sort : (s : Sort) → Term n
+    pi   : (u : Term n) (v : Term (suc n)) → Term n
 
   data Elim (n : ℕ) : Set where
-    apply : (u : Term n) → Elim n
-    proj  : (π : Proj)   → Elim n
+    apply : (u : Term n)   → Elim n
+    proj  : (π : ProjName) → Elim n
 
   Elims : (n : ℕ) → Set
   Elims n = List (Elim n)
@@ -65,6 +69,7 @@ exTyId = pi (sort (uni 0)) (pi (var vz []) (var (vs vz) []))
 
 -- Looking up a field in a field-value collection
 
+-- TODO: Do we want to ensure |fs| = |vs| ?
 data LookupField {a} {A : Set a} : (fs : List QName) (vs : List A) (f : QName) (v : A) → Set where
 
   here : ∀{f fs v vs}
