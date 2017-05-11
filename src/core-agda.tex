@@ -78,7 +78,7 @@
 \subtitlenote{with subtitle note}       %% \subtitlenote is optional;
                                         %% can be repeated if necessary;
                                         %% contents suppressed with 'anonymous'
- x
+
 
 %% Author information
 %% Contents and number of authors suppressed with 'anonymous'.
@@ -220,27 +220,27 @@ x,y,z, \hdots
 
 Terms ($\beta$-normal).
 \[
-\begin{array}{lrll}
-t, u, v &::=& x\; \bar{e}            & \hspace{2cm}\text{Variables (eliminated by $\bar{e}$)} \\
-          &|& c\; \bar{v}            & \hspace{2cm}\text{Data constructor applied to arguments $\bar{v}$} \\
-          &|& \cpi\; \bar{v}         & \hspace{2cm}\text{Recod constructor applied to arguments $\bar{v}$} \\
-          &|& f\; \bar{e}            & \hspace{2cm}\text{Defined function (eliminated by $\bar{e}$), includes postulates} \\
-          &|& \lambda x.\, v         & \hspace{2cm}\text{Lambda abstraction} \\
-          &|& F\; \bar{v}            & \hspace{2cm}\text{Data/record type} \\
-          &|& s               & \hspace{2cm}\text{Sort} \\
-          &|& (x : U) \rightarrow V      & \hspace{2cm}\text{Dependent function type} \\
+\begin{array}{lrl@{\hspace{2cm}}l}
+t, u, v &::=& x\; \bar{e}            & \text{Variables (eliminated by $\bar{e}$)} \\
+          &|& c\; \bar{v}            & \text{Data constructor applied to arguments $\bar{v}$} \\
+          &|& \cpi\; \bar{v}         & \text{Record constructor applied to arguments $\bar{v}$} \\
+          &|& f\; \bar{e}            & \text{Defined function (eliminated by $\bar{e}$), includes postulates} \\
+          &|& \lambda x.\, v         & \text{Lambda abstraction} \\
+          &|& F\; \bar{v}            & \text{Data/record type} \\
+          &|& s               & \text{Sort} \\
+          &|& (x : U) \rightarrow V      & \text{Dependent function type} \\
 \end{array}
 \]
 
 Eliminations.
-\[\begin{array}{lrll}
-e &::=& @u                & \hspace{2cm}\text{Application to term} \\
-    &|& .\pi               & \hspace{2cm}\text{ Projection} \\
+\[\begin{array}{lrl@{\hspace{2cm}}l}
+e &::=& @u                & \text{Application to term} \\
+    &|& .\pi               & \text{ Projection} \\
 \end{array} \]
 
 Sorts.
-\[\begin{array}{lrll}
-s ::= \Set_n             & \hspace{2cm} \text{Universe of types of level $n$} \\
+\[\begin{array}{lrl@{\hspace{2cm}}l}
+s ::= \Set_n             &  \text{Universe of types of level $n$} \\
 \end{array} \]
 We define \fbox{$s \sqcup s'$} by $\Set_i \sqcup \Set_j = \Set_{\max(i,j)}$.
 
@@ -267,10 +267,10 @@ q &::=& @p &\\
 \end{array} \]
 
 Pattern
-\[\begin{array}{lrll}
-p &::=& x     &  \hspace{2cm} \text{Variable pattern} \\
-    &|& c\; \bar{p}    &  \hspace{2cm} \text{Constructor pattern} \\
-    &|& .u      &  \hspace{2cm} \text{Dot pattern} \\
+\[\begin{array}{lrl@{\hspace{2cm}}l}
+p &::=& x     &   \text{Variable pattern} \\
+    &|& c\; \bar{p}    &   \text{Constructor pattern} \\
+    &|& .u      &   \text{Dot pattern} \\
 \end{array} \]
 
 Declarations
