@@ -239,7 +239,7 @@ the type checker.  We write $R.\pi$ for a resolved record projection
 name, $R.c$ for a resolved record constructor name and $D.c$ for a
 resolved data constructor name.
 
-Terms use a spine form for eliminations and thus are kept $\beta$ and
+\emph{Terms} use a spine form for eliminations and thus are kept $\beta$ and
 projection normal form.  This means that terms cannot be a
 $\beta$-redex $(\lambda x.\,v)\,u$ nor a projection of a record value
 $\cpi\,\vec v\,.\pi$.
@@ -258,108 +258,142 @@ t, u, v
 \]
 We use uppercase letters $T,U,V$ for terms that stand for types.
 
-Eliminations.
-\[\begin{array}{lrl@{\hspace{2cm}}l}
+\emph{Eliminations} $e$ exists for functions and records.
+Functions are eliminated by application, records by projection.
+\[
+\begin{array}{lrl@{\hspace{2cm}}l}
 e &::=& @u               & \text{application to term $u$} \\
   & | & .\pi             & \text{taking projection $\pi$} \\
-\end{array} \]
+\end{array}
+\]
+Other forms of elimination, like definiting a function by cases over
+some data structure, need pattern matching, which is supported in
+function declarations, but not in terms directly.
 
-Sorts.
+\emph{Sorts} $s$ are the types of types.
+Here, we model a predicative hierarchy of universes $\Set_0 : \Set_1 : \Set_2 : \dots$.
 \[
 \begin{array}{lrl@{\hspace{2cm}}l}
 s & ::= & \Set_n         &  \text{universe of types of level $n \in \NN$} \\
 \end{array}
 \]
-We define \fbox{$s \sqcup s'$} by $\Set_i \sqcup \Set_j = \Set_{\max(i,j)}$.
+We define \emph{sort supremum} \fbox{$s \sqcup s'$} by $\Set_i \sqcup \Set_j = \Set_{\max(i,j)}$.
 
 
 \subsection{Telescopes and patterns}
 
-Telescopes.
-\[\begin{array}{lrll}
+\emph{Telescopes} $\Delta$ are like typing contexts $\Gamma$ (see below), but right-associative.
+Telescopes are used \eg{} for parameter lists in declarations.
+\[
+\begin{array}{lrl@{\hspace{2cm}}l}
 \Delta &::=& \cempty       & \text{empty telescope} \\
        &  |& (x : T)\Delta & \text{non-empty telescope; $\Delta$ can depend on $x$} \\
-\end{array} \]
-
+\end{array}
+\]
 Notation: iterated function types \fbox{$\Delta \to T$}, defined by recursion on $\Delta$:
-\[\begin{array}{rrll}
-\cempty \to T &=& T &\\
+\[
+\begin{array}{rrl@{\hspace{2cm}}l}
+\cempty \to T       &=& T &\\
 (x : U)\Delta \to T &=& (x : U) \to (\Delta \to T) & \\
-\end{array} \]
+\end{array}
+\]
 
-
-Copattern
-\[\begin{array}{lrll}
-q &::=& @p &\\
-  &  |& .\pi \\
-\end{array} \]
-
-Pattern
-\[\begin{array}{lrl@{\hspace{2cm}}l}
+\emph{Patterns} $p$ are used for definition by cases.
+Patterns are made from variables $x$ and data constructors $c$,
+but can also contain arbitrary terms $u$ that do not bind any variables.
+The latter form is called \emph{inaccessible} pattern, or, due to the
+concrete syntax used in Agda, \emph{dot} pattern.
+\[
+\begin{array}{lrl@{\hspace{2cm}}l}
 p &::=& x              &   \text{variable pattern} \\
-    &|& c\; \bar{p}    &   \text{constructor pattern} \\
-    &|& \dotp u             &   \text{inaccessible pattern (aka dot pattern)} \\
-\end{array} \]
+  & | & c\; \bar{p}    &   \text{constructor pattern} \\
+  & | & \dotp u        &   \text{inaccessible pattern (aka dot pattern)} \\
+\end{array}
+\]
+
+\emph{Copatterns} are to eliminations what patterns are to arguments.
+We match eliminations against copatterns like we match arguments against patterns.
+\[
+\begin{array}{lrl@{\hspace{2cm}}l}
+q &::= & @p   & \text{application pattern} \\
+  &  | & .\pi & \text{projection  pattern}\\
+\end{array}
+\]
 
 \subsection{Declarations}
 \label{sec:declarations}
 
-Declarations
+Agda has three main \emph{declaration} forms that introduce global names into
+the signature $\Sigma$.  Function declarations introduce global
+functions $f$ defined by pattern matching.  A function declaration
+consists of a type signature $\vts$ and a list of function clauses
+$\vec\vcl$.  The signature has to preceed the clauses, but between
+them other declarations are allowed, in order to facilitate mutually
+recursive definitions.  Data (type) declarations consist of a data
+signature $\vds$ and a data definition $\vdd$, which have to appear in
+this order but can also be appart, to realize inductive-recursive
+definitions, for instance.  Similarly record (type) declarations
+consist of a record signature $\vrs$ and a record declaration $\vrd$.
 \[
-\begin{array}{lrll}
+\begin{array}{lrl@{\hspace{2cm}}l}
 d  & ::=  & \mathit{ts} & \mbox{type signature}
 \\ & \mid & \mathit{cl} & \mbox{function clause}
 \\ & \mid & \mathit{ds} & \mbox{data signature}
 \\ & \mid & \mathit{dd} & \mbox{data definition}
 \\ & \mid & \mathit{rs} & \mbox{record signature}
-\\ & \mid & \mathit{rd} & \mbox{record definition}
+\\ & \mid & \mathit{rd} & \mbox{record definition}.
 
 \end{array}
  \]
 
-Type signatures
+\emph{Type signatures} consist of a global name $f$ for the function and its type $T$.
 \[\begin{array}{lrll}
 ts &::=& f : T &\\
 \end{array} \]
-
-Function clauses
-\[\begin{array}{lrll}
+A \emph{function clause} for $f$ consists of a copattern spine $\vec q$ and a right hand side $t$.
+\[
+\begin{array}{lrll}
 cl &::=& f\; \bar{q} = t &\\
-\end{array} \]
-
-Data signature
-\[
-\textbf{data}\; F\; \Delta : \Delta' \to s
+\end{array}
 \]
 
-Data definition
+A \emph{data signature} consists of a name $D$ for the data type,
+a list of its parameters $\Delta$,
+a list of itsindices $\Delta'$,
+and its target sort $s$.
 \[
-\textbf{data}\; F\; \Delta \;\textbf{where}\; \overline{c : T}
+\textbf{data}\; D\; \Delta : \Delta' \to s
+\]
+\emph{Data definitions} repeat the parameter telescope $\Delta$,
+since parameters will be mentioned in the types $T$ of the constructors $c$.
+\[
+\textbf{data}\; D\; \Delta \;\textbf{where}\; \overline{c : T}
 \]
 
-Record signature
-\[ \begin{array}{l}
-\textbf{record}\; F\; \Delta : s
-\end{array}\]
-
-Record declaration
-\[ \begin{array}{l}
-\textbf{record}\; F\; \Delta \; \textbf{where} \\
+\emph{Record signature}s carry, in contrast to data signatures,
+no index telescope $\Delta'$, as Agda does not support indexed record types.
+\[
+\begin{array}{@{}l}
+\textbf{record}\; R\; \Delta : s
+\end{array}
+\]
+\emph{Record declarations} supply a record constructor name $c$
+and a list of fields $\pi$ with their types $T$.
+\[
+\begin{array}{@{}l}
+\textbf{record}\; R\; \Delta \; \textbf{where} \\
 \qquad  \textbf{constructor}\; c \\
 \qquad  \textbf{field}\; \overline{\pi : T} \\
-\end{array}\]
-
-
-
-
-\section{Evaluation}
-\label{sec:evaluation}
+\end{array}
+\]
 
 \newcommand{\datasig}{\text{data } F\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
 \newcommand{\recsig}{\text{record } F\;\Delta : s \text{ where
     $c : T$; } \text{projections } \overline{\pi : T} }
 \newcommand{\funsig}{\text{function } f : T \text{ where } \overline{cl}}
 
+Declaration checking moves declarations to the signature $\Sigma$,
+but not literally, but in a refined form.
 A signature is a list of signature declarations (used internally).
 \[
 \begin{array}{lcl}
@@ -369,7 +403,11 @@ d_\Sigma & ::= & \datasig \\
 & \| & \funsig
 \end{array}
 \]
+TODO: UPDATE SIGNATURE DECLARATIONS.
 
+
+\section{Evaluation}
+\label{sec:evaluation}
 
 Hereditary substitution \fbox{$u[\sigma] = v$}
 and elimination \fbox{$t \bang \overline{e} = v$}\ .
@@ -768,14 +806,14 @@ rd ::= field π : T
   %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
   %% acknowledge financial support and will be used by metadata
   % extraction tools.
-  This material is based upon work supported by the
-  \grantsponsor{GS100000001}{National Science
-    Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
-  No.~\grantnum{GS100000001}{nnnnnnn} and Grant
-  No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
-  conclusions or recommendations expressed in this material are those
-  of the author and do not necessarily reflect the views of the
-  National Science Foundation.
+  % This material is based upon work supported by the
+  % \grantsponsor{GS100000001}{National Science
+  %   Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
+  % No.~\grantnum{GS100000001}{nnnnnnn} and Grant
+  % No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
+  % conclusions or recommendations expressed in this material are those
+  % of the author and do not necessarily reflect the views of the
+  % National Science Foundation.
 \end{acks}
 
 
