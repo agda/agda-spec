@@ -125,7 +125,7 @@ liftSub σ (vsuc x) = rename weak (σ x)
 -- Substitute for the last variable (vzero)
 
 sg : ∀{Γ} (u : Term Γ) → Substitution Γ (suc Γ)
-sg {Γ} u vzero     = u
+sg {Γ} u vzero    = u
 sg {Γ} u (vsuc x) = var x []
 
 data All₂ {A B : Set} (R : A → B → Set) : List A → List B → Set where

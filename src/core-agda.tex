@@ -12,10 +12,6 @@
                         %% http://ctan.org/pkg/subcaption
 \usepackage{mathpartir}
 
-\DeclareMathOperator{\dom}{dom}
-\DeclareMathOperator{\proj}{proj}
-\renewcommand{\|}{\mid}
-
 
 \makeatletter\if@ACM@journal\makeatother
 %% Journal information (used by PACMPL format)
@@ -210,10 +206,6 @@ the core components of Agda.
 \section{Syntax}
 \label{sec:syntax}
 
-\newcommand{\bang}{\,!\,}
-\newcommand{\twobang}{\,!!\,}
-\newcommand{\dotp}[1]{\lfloor#1\rfloor}
-
 \subsection{Terms}
 
 We distinguish global names $f,F,D,c,R,\pi$ bound in the signature $\Sigma$ from
@@ -387,11 +379,6 @@ and a list of fields $\pi$ with their types $T$.
 \end{array}
 \]
 
-\newcommand{\datasig}{\text{data } D\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
-\newcommand{\recsig}{\text{record } R\;\Delta : s \text{ where
-    $c : T$; } \text{projections } \overline{\pi : T} }
-\newcommand{\funsig}{\text{function } f : T \text{ where } \overline{cl}}
-
 Declaration checking moves declarations to the signature $\Sigma$,
 but not literally, but in a refined form.
 A signature is a list of signature declarations (used internally).
@@ -399,8 +386,8 @@ A signature is a list of signature declarations (used internally).
 \begin{array}{lcl}
 \Sigma & ::= &  \overline{d_\Sigma} \\
 d_\Sigma & ::= & \datasig \\
-& \| & \recsig \\
-& \| & \funsig
+& \mid & \recsig \\
+& \mid & \funsig
 \end{array}
 \]
 TODO: UPDATE SIGNATURE DECLARATIONS.
@@ -428,7 +415,7 @@ and elimination \fbox{$t \bang \overline{e} = v$}\ .
   {\lambda x.v \bang @u \overline{e} = v'}
 \qquad
 \inferrule
-  {v_i ! \overline{e} = v'}
+  {v_i \bang \overline{e} = v'}
   {\cpi \overline{v} \bang .\pi_i \overline{e} = v'}
 \\
 \ru{}{t \bang \cdot = t}
@@ -532,17 +519,17 @@ Weak head reduction \fbox{$\Sigma \vdash t \to t'$}
 
 \subsection{Auxiliary judgements}
 
-Function type application \fbox{$T !! \vec u = U$}.
+Function type application \fbox{$T \twobang \vec u = U$}.
 \[
-  \ru{}{T !! . = T}
+  \ru{}{T \twobang . = T}
 \qquad
-  \ru{\subst u x V !! \vec u = T
-    }{\funT x U V !! u \vec u = T}
+  \ru{\subst u x V \twobang \vec u = T
+    }{\funT x U V \twobang u \vec u = T}
 \]
 
-% Type elimination \fbox{$\Sigma \der (t : T) !! e = U$}.
+% Type elimination \fbox{$\Sigma \der (t : T) \twobang e = U$}.
 % \[
-%   \ru{}{\Sigma \der (t : \funT x U V) !! @u = \subst u x V}
+%   \ru{}{\Sigma \der (t : \funT x U V) \twobang @u = \subst u x V}
 % \qquad
 %   \ru{\Sigma \der R.\pi : U
 %     }{}
@@ -578,8 +565,8 @@ Signature lookup \fbox{$\Sigma \der z : T$}.
 Typing contexts.
 \[
 \begin{array}{lcl}
-\Gamma & ::= & \cdot \| \Gamma, x:T \\
-\Delta & ::= & \cdot \| x:T, \Delta
+\Gamma & ::= & \cdot \mid \Gamma, x:T \\
+\Delta & ::= & \cdot \mid x:T, \Delta
 \end{array}
 \]
 
@@ -605,24 +592,24 @@ Well-typed telescopes \fbox{$\Gamma \vdash_\Sigma \Delta$}.
 % \qquad x \in \dom{\Delta} \\
 \]
 
-Spine typing \fbox{$\Gamma \| u : U \vdash \overline{e} : T$}
+Spine typing \fbox{$\Gamma \mid u : U \vdash \overline{e} : T$}
 ($u$ is neutral).
 \begin{gather*}
 % Check spine
 \ru{}
-{\Gamma \| u:U \vdash \cdot : U}
+{\Gamma \mid u:U \vdash \cdot : U}
 \\
 \inferrule
-  {\Gamma \vdash u:U \qquad \Gamma \| t@u:T[u/x] \vdash \overline{e} : V}
-  {\Gamma \| t : \Pi x:U.T \vdash @u \overline{e}:V}
+  {\Gamma \vdash u:U \qquad \Gamma \mid t@u:T[u/x] \vdash \overline{e} : V}
+  {\Gamma \mid t : \Pi x:U.T \vdash @u \overline{e}:V}
 \qquad
 \ru{\Sigma \der R.\pi = T \qquad
-    T !! (\vec u,t) = U \qquad
-    \Gamma \| t.\pi : U \vdash_\Sigma \overline{e} : V
-  }{\Gamma \| t :  R\overline{u}  \vdash_\Sigma .\pi \overline{e} : V}
+    T \twobang (\vec u,t) = U \qquad
+    \Gamma \mid t.\pi : U \vdash_\Sigma \overline{e} : V
+  }{\Gamma \mid t :  R\overline{u}  \vdash_\Sigma .\pi \overline{e} : V}
 % \inferrule{ \Gamma \vdash (t:R\overline{u}).\pi = T'
-% \qquad \Gamma \| t.\pi :T' \vdash_\Sigma \overline{e}:V}
-% { \Gamma \| t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
+% \qquad \Gamma \mid t.\pi :T' \vdash_\Sigma \overline{e}:V}
+% { \Gamma \mid t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
 % \\
 % \Sigma \vdash (t:R\overline{u}).\pi = T
 % \\
@@ -648,7 +635,7 @@ Term typing \fbox{$\Gamma \vdash_\Sigma t : T$}
    }{\Gamma \der_\Sigma f \vec e : V}
 \\
 \ru{\Sigma \der D.c : T \qquad
-    T !! \vec u = T' \qquad
+    T \twobang \vec u = T' \qquad
     \Gamma \mid c : T' \der_\Sigma \vec v : D \, \vec u \, \vec t
   }{\Gamma \der_\Sigma c\,\vec v : D\,\vec u\,\vec t}
 \qquad
@@ -712,15 +699,15 @@ Embedding of (co)patterns into terms \fbox{$\lceil p \rceil = t$}
 %\begin{gather*}
 %\ru{\Gamma \ders U : s}
 %   {\Gamma \ders x : U \leadsto (x : U)} x \not\in dom(\Gamma) \\
-%\ru{\Sigma \der D.c : T \qquad T!!\bar{u} = T' \qquad \Gamma \| c : T \ders @\bar{p} : D\; \bar{u}\; \bar{v} \leadsto \Gamma'}
+%\ru{\Sigma \der D.c : T \qquad T\twobang\bar{u} = T' \qquad \Gamma \mid c : T \ders @\bar{p} : D\; \bar{u}\; \bar{v} \leadsto \Gamma'}
 %   {\Gamma  \ders c\; \bar{p} : D\; \bar{u}\; \bar{v} \leadsto \Gamma'}
 %\end{gather*}
 %
 %
-%Copattern typing \fbox{$\Gamma \| f : T \ders \bar{q} : U \leadsto \Gamma'$}
+%Copattern typing \fbox{$\Gamma \mid f : T \ders \bar{q} : U \leadsto \Gamma'$}
 %\begin{gather*}
 %\ru{\Gamma \vdash p : U \leadsto \Gamma_1 \qquad \Gamma,\Gamma' | h\; @p : V[p/x] \ders \bar{q} : T  \leadsto \Gamma_2}
-%   {\Gamma \| h : \piT x U V \ders @p\; \bar{q} : T \leadsto \Gamma_1 , \Gamma_2}
+%   {\Gamma \mid h : \piT x U V \ders @p\; \bar{q} : T \leadsto \Gamma_1 , \Gamma_2}
 %\end{gather*}
 
 Clause typing \fbox{$f : T \ders cl$}

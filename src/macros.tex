@@ -9,6 +9,7 @@
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\defas}{\mathrel{\ :\Longleftrightarrow\ }}
 \newcommand{\defiff}{\mathrel{:\Longleftrightarrow}}
+\DeclareMathOperator{\dom}{dom}
 
 % latin etc. abbrev
 \newcommand{\abbrev}[1]{#1} % alternative: \emph{#1}
@@ -103,19 +104,33 @@
 %\newcommand{\update}[3]{#1,#2 \is #3}
 
 
-\newcommand{\ders}{\der_\Sigma}
+% Core agda syntax
 \newcommand{\funT}[3]{\Pi #1 \of #2.\, #3}
 \newcommand{\piT}[3]{\Pi #1 \of #2.\, #3}
 \newcommand{\Set}{\mathsf{Set}}
 \newcommand{\cpi}{c_{\vec\pi}}  % record constructor
 \newcommand{\cempty}{\ensuremath{\mathord{\cdot}}}
+\newcommand{\dotp}[1]{\lfloor#1\rfloor}
 
+\newcommand{\datasig}{\text{data } D\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
+\newcommand{\recsig}{\text{record } R\;\Delta : s \text{ where
+    $c : T$; } \text{projections } \overline{\pi : T} }
+\newcommand{\funsig}{\text{function } f : T \text{ where } \overline{cl}}
+
+\DeclareMathOperator{\proj}{proj}
+
+% Variable names
 \newcommand{\vts}{\mathit{ts}}
 \newcommand{\vcl}{\mathit{cl}}
 \newcommand{\vds}{\mathit{ds}}
 \newcommand{\vdd}{\mathit{dd}}
 \newcommand{\vrs}{\mathit{rs}}
 \newcommand{\vrd}{\mathit{rd}}
+
+% Core agda judgements
+\newcommand{\ders}{\der_\Sigma}
+\newcommand{\bang}{\mathrel{!}}
+\newcommand{\twobang}{\mathrel{!!}}
 
 %%% Local Variables:
 %%% mode: latex
