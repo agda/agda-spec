@@ -20,6 +20,7 @@
 # *.ps
 # *.eps
 *.pdf
+comment.cut
 
 ## Agda interface files
 *.agdai
