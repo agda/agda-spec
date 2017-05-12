@@ -529,46 +529,46 @@ Typing contexts.
 \end{array}
 \]
 
-Well-typed contexts \fbox{$\vdash_\Sigma \Gamma$}.
+Well-typed contexts \fbox{$\ders \Gamma$}.
 \[
 % Contexts
-\ru{}{\vdash_\Sigma \cdot}
+\ru{}{\ders \cdot}
 \qquad
 \inferrule
-  {\vdash_\Sigma \Gamma \qquad \Gamma \vdash_\Sigma T:s}
-  {\vdash_\Sigma \Gamma, x : T} \ x \not\in \dom(\Gamma)
+  {\ders \Gamma \qquad \Gamma \ders T:s}
+  {\ders \Gamma, x : T} \ x \not\in \dom(\Gamma)
 \]
 
-Well-typed telescopes \fbox{$\Gamma \vdash_\Sigma \Delta$}.
+Well-typed telescopes \fbox{$\Gamma \ders \Delta$}.
 \[
 % Telescopes
 \inferrule
-  {\vdash_\Sigma \Gamma}
-  {\Gamma \vdash_\Sigma \cdot}
+  {\ders \Gamma}
+  {\Gamma \ders \cdot}
 \qquad
-\inferrule{\Gamma \vdash_\Sigma T : s \qquad \Gamma, x:T \vdash_\Sigma \Delta}
-{\Gamma \vdash_\Sigma (x:T) \Delta}
+\inferrule{\Gamma \ders T : s \qquad \Gamma, x:T \ders \Delta}
+{\Gamma \ders (x:T) \Delta}
 % \qquad x \in \dom{\Delta} \\
 \]
 
-Spine typing \fbox{$\Gamma \mid u : U \vdash \overline{e} : T$}
+Spine typing \fbox{$\Gamma \mid u : U \ders \overline{e} : T$}
 ($u$ is neutral).
 \begin{gather*}
 % Check spine
 \ru{}
-{\Gamma \mid u:U \vdash \cdot : U}
+{\Gamma \mid u:U \ders \cdot : U}
 \\
 \inferrule
-  {\Gamma \vdash u:U \qquad \Gamma \mid t@u:T[u/x] \vdash \overline{e} : V}
-  {\Gamma \mid t : \Pi x:U.T \vdash @u \overline{e}:V}
+  {\Gamma \ders u:U \qquad \Gamma \mid t@u:T[u/x] \ders \overline{e} : V}
+  {\Gamma \mid t : \Pi x:U.T \ders @u \overline{e}:V}
 \qquad
 \ru{\Sigma \der R.\pi = T \qquad
     T \twobang (\vec u,t) = U \qquad
-    \Gamma \mid t.\pi : U \vdash_\Sigma \overline{e} : V
-  }{\Gamma \mid t :  R\overline{u}  \vdash_\Sigma .\pi \overline{e} : V}
+    \Gamma \mid t.\pi : U \ders_\Sigma \overline{e} : V
+  }{\Gamma \mid t :  R\overline{u}  \ders .\pi \overline{e} : V}
 % \inferrule{ \Gamma \vdash (t:R\overline{u}).\pi = T'
-% \qquad \Gamma \mid t.\pi :T' \vdash_\Sigma \overline{e}:V}
-% { \Gamma \mid t : R \overline{u}  \vdash_\Sigma .\pi \overline{e}:V}
+% \qquad \Gamma \mid t.\pi :T' \ders \overline{e}:V}
+% { \Gamma \mid t : R \overline{u}  \ders .\pi \overline{e}:V}
 % \\
 % \Sigma \vdash (t:R\overline{u}).\pi = T
 % \\
@@ -577,42 +577,42 @@ Spine typing \fbox{$\Gamma \mid u : U \vdash \overline{e} : T$}
 % \inferrule{T[u/x] \twobang \overline{e} = v}
 % {(\Pi x:U.T) \twobang @ u \overline{e} = v}
 \\
-\ru{\Gamma \mid u : U \vdash \vec e : V \qquad
-    \Gamma \der U = U' : s
-  }{\Gamma \mid u : U' \vdash \vec e : V}
+\ru{\Gamma \mid u : U \ders \vec e : V \qquad
+    \Gamma \ders U = U' : s
+  }{\Gamma \mid u : U' \ders \vec e : V}
 \end{gather*}
 
 
-Term typing \fbox{$\Gamma \vdash_\Sigma t : T$}
+Term typing \fbox{$\Gamma \ders t : T$}
 \begin{gather*}
 \inferrule
-  {(x:U)\in \Gamma \qquad \Gamma \mid x:U \vdash \overline{e}:T}
-  {\Gamma \vdash x \overline{e} : T}
+  {(x:U)\in \Gamma \qquad \Gamma \mid x:U \ders \overline{e}:T}
+  {\Gamma \ders x \overline{e} : T}
 \qquad
 \ru{\Sigma \vdash f : T \qquad
-    \Gamma \mid f : T \vdash_\Sigma \vec e : V
-   }{\Gamma \der_\Sigma f \vec e : V}
+    \Gamma \mid f : T \ders \vec e : V
+   }{\Gamma \ders f \vec e : V}
 \\
 \ru{\Sigma \der D.c : T \qquad
     T \twobang \vec u = T' \qquad
-    \Gamma \mid c : T' \der_\Sigma \vec v : D \, \vec u \, \vec t
-  }{\Gamma \der_\Sigma c\,\vec v : D\,\vec u\,\vec t}
+    \Gamma \mid c : T' \ders \vec v : D \, \vec u \, \vec t
+  }{\Gamma \ders c\,\vec v : D\,\vec u\,\vec t}
 \qquad
 \ru{\Sigma \vdash z : T \qquad
-    \Gamma \mid z : T \vdash_\Sigma \vec u : V
-   }{\Gamma \der_\Sigma z \, \vec u : V} \ z ::= D \mid R
+    \Gamma \mid z : T \ders \vec u : V
+   }{\Gamma \ders z \, \vec u : V} \ z ::= D \mid R
 \\
-\ru{\Gamma, x \of U \der_\Sigma v : V
-  }{\Gamma \der_\Sigma \lambda x.v : \funT x U V}
+\ru{\Gamma, x \of U \ders v : V
+  }{\Gamma \ders \lambda x.v : \funT x U V}
 \qquad
-\ru{\Gamma \der U : s \qquad
-    \Gamma, x \of U \der V : s'
-  }{\Gamma \der \piT x U V : s \sqcup s'}
+\ru{\Gamma \ders U : s \qquad
+    \Gamma, x \of U \ders V : s'
+  }{\Gamma \ders \piT x U V : s \sqcup s'}
 \end{gather*}
 
 
 Conversion
-\fbox{$\Gamma \vdash_\Sigma t = t' : T$}\ .
+\fbox{$\Gamma \ders t = t' : T$}\ .
 \begin{gather*}
 %
 \ru{f\,\overline q = t \in \Sigma \qquad
