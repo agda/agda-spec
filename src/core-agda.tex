@@ -678,17 +678,17 @@ Embedding of (co)patterns into terms \fbox{$\lceil p \rceil = t$}
 Clause typing \fbox{$f : T \ders cl$}
 \begin{gather*}
 \ru{PV(\bar{q}) = dom(\Gamma) \qquad
-    \Gamma | f : T \ders \lceil \bar{q} \rceil : U \qquad
+    \Gamma \mid f : T \ders \lceil \bar{q} \rceil : U \qquad
     \Gamma \ders t : U}
    {f : T \ders f\; \bar{q} = t}
 \end{gather*}
 
-Constructor typing \fbox{$\Delta | U : \Delta' \to s \ders c : T$}
+Constructor typing \fbox{$\Delta \mid U : \Delta' \to s \ders c : T$}
 \begin{gather*}
 \ru{\Delta \ders \Gamma \to T : s \qquad
     \Delta,\Gamma \ders \bar{v} : \Delta' \qquad
     \Delta,\Gamma \ders T = U\; \bar{v} : s}
-   {\Delta | U : \Delta' \to s \ders c : \Gamma \to T}
+   {\Delta \mid U : \Delta' \to s \ders c : \Gamma \to T}
 \end{gather*}
 
 % TODO: add syntax for lone declarations without a definition (i.e. with no 'where').
@@ -703,7 +703,7 @@ Declaration typing \fbox{$\Sigma \der d \leadsto \Sigma'$}
 \ru{D \not\in \Sigma \qquad \ders \Delta \qquad \Delta \ders \Delta'}
    {\Sigma \der data\; D\; \Delta : \Delta' \to s \leadsto \Sigma, data\; D\; \Delta : \Delta' \to s}
 \\
-\ru{\forall i.\; \Delta | D\; \Delta : \Delta' \to s \vdash c_i : T_i}
+\ru{\forall i.\; \Delta \mid D\; \Delta : \Delta' \to s \vdash c_i : T_i}
    {\Sigma[data\; D; \Delta : \Delta' \to s] \ders data\; D\; \Delta\; where\; \overline{c : T} \leadsto \Sigma[data\; D\; \Delta : \Delta' \to s\; where\; \overline{c : T}]}
 \\
 \ru{R \not\in \Sigma \qquad \ders \Delta}
