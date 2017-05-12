@@ -3,14 +3,14 @@
 module Syntax (QName : Set) where
 
 open import Data.Nat.Base
-open import Data.List.Base
+open import Data.List.Base hiding (_∷ʳ_)
 
 -- Well-scoped de Bruijn indices
 -- n is the length of the context
 
 data Var : ℕ → Set where
   vzero : ∀{n} → Var (suc n)
-  vsuc : ∀{n} (x : Var n) → Var (suc n)
+  vsuc  : ∀{n} (x : Var n) → Var (suc n)
 
 -- Example: in context x,y,z (so n = 3)
 -- x  is  vsuc (vsuc vzero) : Var 3
@@ -42,8 +42,8 @@ mutual
 
   data Term (n : ℕ) : Set where
     var : (x : Var n) (es : Elims n) → Term n
-    con : (c : ConHead) (vs : Args n) → Term n     -- Fully applied
     def : (f : FuncName) (es : Elims n) → Term n
+    con : (c : ConHead) (vs : Args n) → Term n     -- Fully applied
     lam : (v : Term (suc n)) → Term n
     -- Types
     dat  : (d : DRName) (vs : Args n) → Term n     -- Fully applied
@@ -99,8 +99,8 @@ liftRen ρ (vsuc x) = vsuc (ρ x)
 mutual
   rename : ∀{Γ Δ} (ρ : Renaming Γ Δ) (t : Term Δ) → Term Γ
   rename ρ (var x es) = var (ρ x) (map (renameElim ρ) es)
-  rename ρ (con c vs) = con c (map (rename ρ) vs)
   rename ρ (def f es) = def f (map (renameElim ρ) es)
+  rename ρ (con c vs) = con c (map (rename ρ) vs)
   rename ρ (lam t)    = lam (rename (liftRen ρ) t)
   rename ρ (dat d vs) = dat d (map (rename ρ) vs)
   rename ρ (sort s)   = sort s
@@ -165,13 +165,13 @@ mutual
       → Apply (σ x) es' v
       → SubstTerm σ (var x es) v
 
-    con : ∀{c : ConHead} {vs : Args Δ} {vs' : Args Γ}
-      → All₂ (SubstTerm σ) vs vs'
-      → SubstTerm σ (con c vs) (con c vs')
-
     def : ∀{f : FuncName} {es : Elims Δ} {es' : Elims Γ}
       → All₂ (SubstElim σ) es es'
       → SubstTerm σ (def f es) (def f es')
+
+    con : ∀{c : ConHead} {vs : Args Δ} {vs' : Args Γ}
+      → All₂ (SubstTerm σ) vs vs'
+      → SubstTerm σ (con c vs) (con c vs')
 
     lam : ∀{v : Term (suc Δ)} {v'}
       → SubstTerm (liftSub σ) v v'
@@ -197,3 +197,82 @@ mutual
 
     proj : ∀{π}
       → SubstElim σ (proj π) (proj π)
+
+data FunctionApply {Γ} : (T : Term Γ) (us : Args Γ) (U : Term Γ) → Set where
+
+  empty : ∀{T}
+    → FunctionApply T [] T
+
+  pi : ∀{u us T U V V'}
+    → SubstTerm (sg u) V V'
+    → FunctionApply V' us T
+    → FunctionApply (pi U V) (u ∷ us) T
+
+-- n is the number of free variables in scope
+data Telescope (n : ℕ) : Set where
+  []  : Telescope n
+  _∷_ : Term n → Telescope (suc n) → Telescope n
+
+-- n is the length of the context
+data Context : (n : ℕ) → Set where
+  []   : Context zero
+  _∷ʳ_ : ∀{n} → Context n → Term n → Context (suc n)
+
+data Pattern (n : ℕ) : Set where
+  pvariable      : Var n → Pattern n
+  pconstructor   : ConsName → List (Pattern n) → Pattern n  --TODO: Should n be uniform here?
+  pinaccesssible : Term n → Pattern n
+
+data Copattern (n : ℕ) : Set where
+  capply : Pattern n → Copattern n
+  cproj  : ProjName  → Copattern n
+
+record ConsDeclaration (n : ℕ) : Set where
+  field
+    consName : ConsName
+    consType : Term n
+
+record ProjDeclaration (n : ℕ) : Set where
+  field
+    projName : ProjName
+    projType : Term n
+
+-- TODO: Should we parameterize the data signature by the lengths of the two telescopes?
+record DataSignature (m n : ℕ) : Set where
+  field
+    name    : DRName
+    params  : Telescope m
+    indices : Telescope n
+    dsort   : Sort
+
+record DataDefinition (n : ℕ) : Set where
+  field
+    name         : DRName
+    params       : Telescope n
+    constructors : List (ConsDeclaration n)
+
+record RecordSignature (n : ℕ) : Set where
+  field
+    name   : DRName
+    params : Telescope n
+    dsort  : Sort
+
+record RecordDefinition (n : ℕ) : Set where
+  field
+    name         : DRName
+    params       : Telescope n
+    fconstructor : ConsName
+    fields       : List (ProjDeclaration n)
+
+data Declaration (n : ℕ) : Set where
+  typeSignature    : FuncName → Term n → Declaration n
+  functionClause   : FuncName → List (Copattern n) → Term n → Declaration n  --TODO: Should n be uniform here?
+  dataSignature    : ∀{m} → DataSignature n m → Declaration n -- TODO: Fix this.
+  dataDefinition   : DataDefinition n → Declaration n
+  recordSignature  : RecordSignature n → Declaration n
+  recordDefinition : RecordDefinition n → Declaration n
+
+data SignatureDeclaration (n : ℕ) : Set where
+  dataSig   : DataDefinition n   → SignatureDeclaration n
+  recordSig : RecordDefinition n → SignatureDeclaration n
+--  functionSig : 
