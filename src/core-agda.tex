@@ -397,8 +397,13 @@ d_\Sigma & ::= & \datasig \\
 TODO: UPDATE SIGNATURE DECLARATIONS.
 
 
-\section{Evaluation}
-\label{sec:evaluation}
+
+
+\section{Typing rules}
+\label{sec:typing}
+
+
+\subsection{Auxiliary judgements}
 
 Hereditary substitution \fbox{$u[\sigma] = v$}
 is defined simultaneously with active elimination (see below).
@@ -472,75 +477,6 @@ to these.  Of course, function type and sort expressions cannot be applied eithe
 % \end{array}
 % \]
 
-
-
-Matching \fbox{$\Sigma \vdash e/q = \sigma$}\ .
-\begin{gather*}
-\ru{}{\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
-\qquad
-\ru{}{\Sigma \vdash v/x = [v/x]} % var pat
-\qquad
-\ru
-  {\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
-  {\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
-\qquad
-\ru{v \bang \pi_i / p_i = \sigma}
-{\Sigma \vdash v / \cpi \overline{p} = \sigma} % record pat
-\qquad
-\ru{}{\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
-\\
-\ru{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
-{\Sigma \vdash v / c \overline{p} = \sigma} % reduce
-\end{gather*}
-% \[
-% \begin{array}{ll}
-% \overline{e}/\overline{q} = \sigma  &
-% \Sigma \vdash e/q = \sigma
-% \end{array}
-% \]
-
-% \[
-% \begin{array}{ll}
-% \inferrule{}
-% {\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
-% &
-% \inferrule{}
-% {\Sigma \vdash v/x = [v/x]} % var pat
-% \\
-% \inferrule{\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
-% {\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
-% &
-% \inferrule{}
-% {\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
-% \\
-% \inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
-% {\Sigma \vdash v / c \overline{p} = \sigma} % reduce
-% &
-% \inferrule{v \bang \pi_i / p_i = \sigma}
-% {\Sigma \vdash v / c_{\overline \pi} \overline{p} = \sigma} % record pat
-% \end{array}
-% \]
-
-Weak head reduction \fbox{$\Sigma \vdash t \to t'$}
-\[
-\begin{array}{lll}
-\inferrule{f \overline q = t \in \Sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma}
-{\Sigma \vdash f \overline{e} \overline{e}' \to t[\sigma] \bang \overline{e}'}
-&
-\ru{}
-{\Sigma \vdash \cdot/\cdot = \cdot} %empty
-&
-\inferrule{\Sigma \vdash e/q = \sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma'}
-{\Sigma \vdash e, \overline{e}/q, \overline{q} = \sigma \uplus \sigma'}%patterns
-\end{array}
-\]
-
-
-\section{Typing rules}
-\label{sec:typing}
-
-
-\subsection{Auxiliary judgements}
 
 Function type application \fbox{$T \twobang \vec u = U$}.
 \[
@@ -679,10 +615,16 @@ Conversion
 \fbox{$\Gamma \vdash_\Sigma t = t' : T$}\ .
 \begin{gather*}
 %
-\ru{\Sigma \der t \red t' \qquad
-    \Gamma \ders t : T \qquad
-    \Gamma \ders t' : T
-  }{\Gamma \ders t = t' : T}
+\ru{f\,\overline q = t \in \Sigma \qquad
+    (\overline q)[\sigma] = \overline e \qquad
+    t[\sigma] = v \qquad
+    \Gamma \ders f\,\overline e : T \qquad
+    \Gamma \ders v : T
+  }{\Gamma \ders f \overline e = v : T}
+% \ru{\Sigma \der t \red t' \qquad
+%     \Gamma \ders t : T \qquad
+%     \Gamma \ders t' : T
+%   }{\Gamma \ders t = t' : T}
 \\
 \ru{\Gamma \ders t : \funT x U V
   }{\Gamma \ders t = \lambda x. t\, x : \funT x U V}
@@ -775,6 +717,70 @@ Declaration typing \fbox{$\Sigma \der d \leadsto \Sigma'$}
 
 
 
+\section{Evaluation}
+\label{sec:evaluation}
+
+
+Matching \fbox{$\Sigma \vdash e/q = \sigma$}\ .
+\begin{gather*}
+\ru{}{\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
+\qquad
+\ru{}{\Sigma \vdash v/x = [v/x]} % var pat
+\qquad
+\ru
+  {\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
+  {\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
+\qquad
+\ru{v \bang \pi_i / p_i = \sigma}
+{\Sigma \vdash v / \cpi \overline{p} = \sigma} % record pat
+\qquad
+\ru{}{\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
+\\
+\ru{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
+{\Sigma \vdash v / c \overline{p} = \sigma} % reduce
+\end{gather*}
+% \[
+% \begin{array}{ll}
+% \overline{e}/\overline{q} = \sigma  &
+% \Sigma \vdash e/q = \sigma
+% \end{array}
+% \]
+
+% \[
+% \begin{array}{ll}
+% \inferrule{}
+% {\Sigma \vdash v/\lfloor u \rfloor = \cdot} % dot pattern
+% &
+% \inferrule{}
+% {\Sigma \vdash v/x = [v/x]} % var pat
+% \\
+% \inferrule{\Sigma \vdash \overline{v}/\overline{\sigma} = \sigma}
+% {\Sigma \vdash c\overline{v}/c\overline{p} = \sigma}  % con pat
+% &
+% \inferrule{}
+% {\Sigma \vdash .\pi/.\pi = \cdot} % proj pat
+% \\
+% \inferrule{\Sigma \vdash v \to v' \qquad \Sigma \vdash v'/c\overline{p} = \sigma}
+% {\Sigma \vdash v / c \overline{p} = \sigma} % reduce
+% &
+% \inferrule{v \bang \pi_i / p_i = \sigma}
+% {\Sigma \vdash v / c_{\overline \pi} \overline{p} = \sigma} % record pat
+% \end{array}
+% \]
+
+Weak head reduction \fbox{$\Sigma \vdash t \to t'$}
+\[
+\begin{array}{lll}
+\inferrule{f \overline q = t \in \Sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma}
+{\Sigma \vdash f \overline{e} \overline{e}' \to t[\sigma] \bang \overline{e}'}
+&
+\ru{}
+{\Sigma \vdash \cdot/\cdot = \cdot} %empty
+&
+\inferrule{\Sigma \vdash e/q = \sigma \qquad \Sigma \vdash \overline{e}/\overline{q} = \sigma'}
+{\Sigma \vdash e, \overline{e}/q, \overline{q} = \sigma \uplus \sigma'}%patterns
+\end{array}
+\]
 
 
 
