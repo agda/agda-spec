@@ -79,7 +79,7 @@
 \newcommand{\mgoal}[1][]{\mbox{goal\ifthenelse{\equal{#1}{}}{}{~#1}}}
 \newcommand{\mby}[1]{\mbox{by #1}}
 \newcommand{\minfrule}{\mbox{by inference rule}}
-
+\newcommand{\mempty}{\mbox{ empty}}
 
 % Inference rules
 \newcommand{\rulename}[1]{\ensuremath{\mbox{\sc#1}}}
@@ -115,6 +115,7 @@
 \newcommand{\dotp}[1]{\lfloor#1\rfloor} % inaccessible pattern
 \newcommand{\embp}[1]{\lceil#1\rceil} % embedding of patterns into  terms
 
+\newcommand{\absurd}[1]{\text{absurd}\,#1}
 \newcommand{\datasig}{\text{data } D\; \Delta : \Delta' \to s \text{ where } \overline{c : T}}
 \newcommand{\recsig}{\text{record } R\;\Delta : s \text{ where
     $c : T$; } \text{projections } \overline{\pi : T} }
@@ -129,11 +130,15 @@
 \newcommand{\vdd}{\mathit{dd}}
 \newcommand{\vrs}{\mathit{rs}}
 \newcommand{\vrd}{\mathit{rd}}
+\newcommand{\vrhs}{\mathit{rhs}}
 
 % Core agda judgements
 \newcommand{\ders}{\der_\Sigma}
 \newcommand{\bang}{\mathrel{!}}
 \newcommand{\twobang}{\mathrel{!!}}
+\newcommand{\apart}{\mathrel{\#}}%{\mathrel{{<}{>}}}
+\newcommand{\prefine}[2]{\stackrel{x \mapsto c}\Longrightarrow}
+\newcommand{\noinstance}{\not\preceq}
 
 %%% Local Variables:
 %%% mode: latex

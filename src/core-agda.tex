@@ -338,7 +338,6 @@ d  & ::=  & \mathit{ts} & \mbox{type signature}
 \\ & \mid & \mathit{dd} & \mbox{data definition}
 \\ & \mid & \mathit{rs} & \mbox{record signature}
 \\ & \mid & \mathit{rd} & \mbox{record definition}.
-
 \end{array}
  \]
 
@@ -346,10 +345,14 @@ d  & ::=  & \mathit{ts} & \mbox{type signature}
 \[\begin{array}{lrll}
 ts &::=& f : T &\\
 \end{array} \]
-A \emph{function clause} for $f$ consists of a copattern spine $\vec q$ and a right hand side $t$.
+A \emph{function clause} for $f$ consists of a copattern spine $\vec q$ and a right hand side $\vrhs$.
+The right hand side is either empty or has evidence that the case is impossible.
 \[
 \begin{array}{lrll}
-cl &::=& f\; \bar{q} = t &\\
+cl &::=& f\; \bar{q} = \vrhs  &\\
+\vrhs & ::= & t & \text{term (clause body)}\\
+      & \mid& \absurd \vec x  & (\vec x \not=\emptyset)
+      \text{ absurd clause (each variable $x_i$ has empty type)} \\
 \end{array}
 \]
 
@@ -638,7 +641,79 @@ And many boring rules (equivalence, congruence)
 and rules for elimination equality
 \fbox{$\Gamma \mid t : T \ders \vec e = \vec e' : V$}
 
+\newpage
 
+\subsection{Type emptiness}
+
+\fbox{$\Gamma \der t \apart t' : T$}  In context $\Gamma$, terms $t$ and $t'$ of type $T$ cannot ever be unified.
+\begin{gather*}
+\rux{\Gamma \der c \vec v : T \qquad \Gamma \der c' \vec v' : T
+   }{\Gamma \der c \vec v \apart c' \vec v' : T
+   }{c \not= c'}
+\qquad
+\ru{\Gamma \der t \apart t' : T
+  }{\Gamma \der t' \apart t : T}
+\qquad
+\ru{\Gamma \der t \apart t' : T \qquad \Gamma \der t' = t'' : T
+  }{\Gamma \der t \apart t'' : T}
+\\
+\ru{\Sigma \der c : \Delta \to \Delta' \to D\,\Delta \,\vec u' \qquad
+    % \subst{\vec t}\Delta{\vec u'} = \vec u'' \qquad
+    \subst{\vec t}\Delta{\Delta'} = \Delta'' \qquad
+    \Gamma \der \vec v \apart \vec v' : \Delta''
+  }{\Gamma \der c \vec v \apart c \vec v' : D\,\vec t\,\vec u}
+% \ru{\Sigma \der c : \Delta \to \Delta' \to D\,\Delta \,\vec u' \qquad
+%     \subst{\vec t}\Delta{\vec u'} = \vec u'' \qquad
+%     \subst{\vec t}\Delta{\Delta'} = \Delta'' \qquad
+%     \Gamma \mid c : \Delta' \to D\,\vec t\,\vec u'' \der \vec v \apart \vec v' : D\,\vec t\,\vec u''
+%   }{\Gamma \der c \vec v \apart c \vec v' : D\,\vec t\,\vec u}
+\qquad
+\ru{\Gamma \der t \apart t' : T \qquad \Gamma \der T = T' : s
+  }{\Gamma \der t \apart t' : T'}
+\end{gather*}
+\fbox{$\Gamma \der \vec v \apart \vec v' : \Delta$}
+In context $\Gamma$, argument lists $\vec v$ and $\vec v'$ of telescope $\Delta$ cannot ever be unified.
+\begin{gather*}
+\ru{\Gamma \der v \apart v' : T
+  }{\Gamma \der v\,\vec v \apart v'\,\vec v' : (x \of T)\Delta}
+\\[2ex]
+\ru{\Gamma \der v = v' : T \qquad
+    \subst v x \Delta = \Delta' \qquad
+    \Gamma \der \vec v \apart \vec v' : \Delta'
+  }{\Gamma \der v \vec v \apart v' \vec v' : (x \of T) \Delta}
+\qquad
+\ru{%\Gamma \der \Delta \qquad
+    x \not\in\FV(\Delta) \qquad
+    % \subst {v_1} x \Delta = \Delta_1 \qquad
+    % \subst {v_2} x \Delta = \Delta_2 \qquad
+    % \Gamma \der \Delta_1 = \Delta_2 \qquad
+    \Gamma \der \vec v \apart \vec v' : \Delta
+  }{\Gamma \der v \vec v \apart v' \vec v' : (x \of T) \Delta}
+\end{gather*}
+
+\fbox{$\Gamma \der T \noinstance U$}
+\begin{gather*}
+\ru{\subst {\vec u} \Delta {\Delta'} = \Delta'' \qquad
+    \subst {\vec u} \Delta {\vec v'}  = \vec v'' \qquad
+    \Gamma, \Delta'' \der \vec v'' \apart \vec v : \Delta''
+  }{\Gamma \der \Delta \to \Delta' \to D\,\Delta\,\vec v' \noinstance D\,\vec u\,\vec v
+  }
+\qquad
+\end{gather*}
+
+\fbox{$\Gamma \der T \mempty$}: In context $\Gamma$, data type $T$ has no canonical inhabitants.
+\begin{gather*}
+\ru{\forall c.\ \Sigma \der D.c : U \Rightarrow \Gamma \der U \noinstance T
+  }{\Gamma \der T \mempty
+  }
+\qquad
+\ru{\Gamma \der T \mempty \qquad \Gamma \der T = T' : s
+  }{\Gamma \der T' \mempty}
+\end{gather*}
+
+\begin{verbatim}
+
+\end{verbatim}
 \subsection{Declaration typing}
 
 (Co)pattern variables \fbox{$PV(p) = \bar{x}$}
@@ -681,6 +756,11 @@ Clause typing \fbox{$f : T \ders cl$}
     \Gamma \mid f : T \ders \lceil \bar{q} \rceil : U \qquad
     \Gamma \ders t : U}
    {f : T \ders f\; \bar{q} = t}
+\\
+\ru{PV(\bar{q}) = dom(\Gamma) \qquad
+    \Gamma \mid f : T \ders \lceil \bar{q} \rceil : U \qquad
+    \forall i.\ \Gamma \ders \Gamma(x_i) \mempty}
+   {f : T \ders f\; \bar{q} = \absurd \vec x}
 \end{gather*}
 
 Constructor typing \fbox{$\Delta \mid U : \Delta' \to s \ders c : T$}
@@ -786,6 +866,13 @@ Weak head reduction \fbox{$\Sigma \vdash t \to t'$}
 
 \section{Coverage}
 \label{sec:coverage}
+
+Pattern refinement
+\fbox{$\Gamma \der \vec p : \Delta \prefine x c \Gamma' \der \vec p' : \Delta$}.
+\begin{gather*}
+  \ru{(x : D\,\vec u\,\vec v \in \Gamma) \qquad \Sigma \der D.c : T
+    }{\Gamma \der \vec p : \Delta \prefine x c \Gamma' \der p \sigma [c\,\vec y / x] : ?}
+\end{gather*}
 
 \section{Termination}
 \label{sec:termination}
