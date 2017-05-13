@@ -3,7 +3,9 @@
 module Syntax (QName : Set) where
 
 open import Data.Nat.Base
+open import Data.Nat.Properties.Simple using (+-suc; +-right-identity)
 open import Data.List.Base hiding (_∷ʳ_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans)
 
 -- Well-scoped de Bruijn indices
 -- n is the length of the context
@@ -208,19 +210,31 @@ data FunctionApply {Γ} : (T : Term Γ) (us : Args Γ) (U : Term Γ) → Set whe
     → FunctionApply V' us T
     → FunctionApply (pi U V) (u ∷ us) T
 
--- n is the number of free variables in scope
-data Telescope (n : ℕ) : Set where
-  []  : Telescope n
-  _∷_ : Term n → Telescope (suc n) → Telescope n
-
 -- n is the length of the context
 data Context : (n : ℕ) → Set where
   []   : Context zero
   _∷ʳ_ : ∀{n} → Context n → Term n → Context (suc n)
 
+-- n is the size of the outer context; m is the size of the telescope
+data Telescope (n : ℕ) : (m : ℕ) →  Set where
+  []  : Telescope n zero
+  _∷_ : ∀{m} → Term n → Telescope (suc n) m → Telescope n (suc m)
+
+telescopeSize : ∀{n m} → Telescope n m → ℕ
+telescopeSize {m = m} _ = m
+
+suc-move : (m n : ℕ) → m + suc n ≡ suc m + n
+suc-move zero    n = refl
+suc-move (suc m) n = cong suc (+-suc m n)
+
+-- Add a telescope to a compatible outer context.
+addToContext : ∀{n m}  → Context n → Telescope n m → Context (n + m)
+addToContext {n}            Γ []                rewrite +-right-identity n = Γ
+addToContext {n} {.(suc m)} Γ (_∷_ {m = m} x t) rewrite suc-move n m       = addToContext (Γ ∷ʳ x) t 
+
 data Pattern (n : ℕ) : Set where
   pvariable      : Var n → Pattern n
-  pconstructor   : ConsName → List (Pattern n) → Pattern n  --TODO: Should n be uniform here?
+  pconstructor   : ConsName → List (Pattern n) → Pattern n
   pinaccesssible : Term n → Pattern n
 
 data Copattern (n : ℕ) : Set where
@@ -237,42 +251,47 @@ record ProjDeclaration (n : ℕ) : Set where
     projName : ProjName
     projType : Term n
 
--- TODO: Should we parameterize the data signature by the lengths of the two telescopes?
-record DataSignature (m n : ℕ) : Set where
-  field
-    name    : DRName
-    params  : Telescope m
-    indices : Telescope n
-    dsort   : Sort
-
-record DataDefinition (n : ℕ) : Set where
+record DataSignature : Set where
   field
     name         : DRName
-    params       : Telescope n
-    constructors : List (ConsDeclaration n)
+    {numParams}  : ℕ
+    {numIndices} : ℕ
+    params       : Telescope zero      numParams
+    indices      : Telescope numParams numIndices
+    dsort        : Sort
 
-record RecordSignature (n : ℕ) : Set where
-  field
-    name   : DRName
-    params : Telescope n
-    dsort  : Sort
-
-record RecordDefinition (n : ℕ) : Set where
+record DataDefinition : Set where
   field
     name         : DRName
-    params       : Telescope n
+    {numParams}  : ℕ
+    params       : Telescope zero numParams
+    constructors : List (ConsDeclaration numParams)
+
+record RecordSignature : Set where
+  field
+    name        : DRName
+    {numParams} : ℕ
+    params      : Telescope zero numParams
+    dsort       : Sort
+
+record RecordDefinition : Set where
+  field
+    name         : DRName
+    {numParams}  : ℕ
+    params       : Telescope zero numParams
     fconstructor : ConsName
-    fields       : List (ProjDeclaration n)
+    fields       : List (ProjDeclaration numParams)
 
-data Declaration (n : ℕ) : Set where
-  typeSignature    : FuncName → Term n → Declaration n
-  functionClause   : FuncName → List (Copattern n) → Term n → Declaration n  --TODO: Should n be uniform here?
-  dataSignature    : ∀{m} → DataSignature n m → Declaration n -- TODO: Fix this.
-  dataDefinition   : DataDefinition n → Declaration n
-  recordSignature  : RecordSignature n → Declaration n
-  recordDefinition : RecordDefinition n → Declaration n
+-- TODO: How to represent pattern variables?
+data Declaration : Set where
+  typeSignature    : FuncName → Term zero → Declaration
+  functionClause   : FuncName → List (Copattern zero) → Term zero → Declaration
+  dataSignature    : DataSignature    → Declaration
+  dataDefinition   : DataDefinition   → Declaration
+  recordSignature  : RecordSignature  → Declaration
+  recordDefinition : RecordDefinition → Declaration
 
-data SignatureDeclaration (n : ℕ) : Set where
-  dataSig   : DataDefinition n   → SignatureDeclaration n
-  recordSig : RecordDefinition n → SignatureDeclaration n
+data SignatureDeclaration : Set where
+  dataSig   : DataDefinition   → SignatureDeclaration
+  recordSig : RecordDefinition → SignatureDeclaration
 --  functionSig : 
