@@ -232,9 +232,10 @@ addToContext : ∀{n m}  → Context n → Telescope n m → Context (n + m)
 addToContext {n}            Γ []                rewrite +-right-identity n = Γ
 addToContext {n} {.(suc m)} Γ (_∷_ {m = m} x t) rewrite suc-move n m       = addToContext (Γ ∷ʳ x) t
 
-expandTelescope : ∀ {n m} → Telescope n m → Term n → Term n
-expandTelescope [] T = T
-expandTelescope (U ∷ Δ) T = pi U (expandTelescope Δ {!!})
+expandTelescope : ∀ {n m} → Telescope n m → Term (n + m) → Term n
+expandTelescope {n} [] T rewrite +-right-identity n = T
+expandTelescope {n} {suc m} (U ∷ Δ) T rewrite suc-move n m =
+  pi U (expandTelescope Δ T)
 
 data Pattern (n : ℕ) : Set where
   pvariable      : Var n → Pattern n
@@ -246,11 +247,13 @@ data Copattern (n : ℕ) : Set where
   cproj  : ProjName  → Copattern n
 
 record ConsDeclaration (n : ℕ) : Set where
+  constructor mkConsDeclaration
   field
     consName : ConsName
     consType : Term n
 
 record ProjDeclaration (n : ℕ) : Set where
+  constructor mkProjDeclaration
   field
     projName : ProjName
     projType : Term n
@@ -273,6 +276,7 @@ record DataDefinition : Set where
     constructors : List (ConsDeclaration numParams)
 
 record RecordSignature : Set where
+  constructor mkRecordSignature
   field
     name        : DRName
     {numParams} : ℕ
@@ -307,15 +311,16 @@ data Declaration : Set where
 
 -- TODO: Update signature declarations
 data SignatureDeclaration : Set where
-  dataSig     : DataSignature   → List (ConsDeclaration zero) → SignatureDeclaration
-  recordSig   : RecordSignature → ConsDeclaration zero →
-                List (ProjDeclaration zero) → SignatureDeclaration
+  dataSig     : (D : DataSignature) → List (ConsDeclaration (DataSignature.numParams D)) →
+                SignatureDeclaration
+  recordSig   : (R : RecordSignature) → ConsDeclaration (RecordSignature.numParams R) →
+                List (ProjDeclaration (RecordSignature.numParams R)) → SignatureDeclaration
   functionSig : FuncName → Term zero → List FuncClause → SignatureDeclaration
 
 Signature : Set
 Signature = List SignatureDeclaration
 
-data LookupSig :  Signature → SignatureDeclaration → Set where
+data LookupSig : Signature → SignatureDeclaration → Set where
 
   here : ∀{sd sds}
     → LookupSig (sd ∷ sds) sd
@@ -323,3 +328,41 @@ data LookupSig :  Signature → SignatureDeclaration → Set where
   there : ∀{sd sd' sds}
     → LookupSig sds sd
     → LookupSig (sd' ∷ sds) sd
+
+data LookupCons : ∀{m} → List (ConsDeclaration m) → ConsName → Term m → Set where
+
+  here : ∀{c m} {T : Term m} {cs : List (ConsDeclaration m)}
+    → LookupCons {m} (mkConsDeclaration c T ∷ cs) c T
+    
+  there : ∀{c c' m} {T : Term m} {T' : Term m} {cs : List (ConsDeclaration m)} 
+    → LookupCons cs c T
+    → LookupCons (mkConsDeclaration c' T' ∷ cs) c T
+
+data LookupProj : ∀{m} → List (ProjDeclaration m) → ProjName → Term m → Set where
+
+  here : ∀{π m} {T : Term m} {πs : List (ProjDeclaration m)}
+    → LookupProj (mkProjDeclaration π T ∷ πs) π T
+    
+  there : ∀ {π π' m} {πs : List (ProjDeclaration m)} {T : Term m} {T' : Term m}
+    → LookupProj πs π T
+    → LookupProj (mkProjDeclaration π' T' ∷ πs) π T
+
+data SigLookup : ∀{m} → Signature → QName → Term m → Set where
+  func : ∀{Σ f T cls} → LookupSig Σ (functionSig f T cls) → SigLookup Σ f T
+  dat : ∀{Σ D m m' s cs} {Δ : Telescope zero m} {Δ' : Telescope m m'} → 
+        LookupSig Σ (dataSig (mkDataSignature D {m} {m'} Δ Δ' s) cs) →
+        SigLookup Σ D (expandTelescope Δ (expandTelescope Δ' (sort s)))
+  con : ∀{Σ D m m' s cs c T} {Δ : Telescope zero m} {Δ' : Telescope m m'} → 
+        LookupSig Σ (dataSig (mkDataSignature D {m} {m'} Δ Δ' s) cs) →
+        LookupCons cs c T → 
+        SigLookup Σ c (expandTelescope Δ T)
+  rec : ∀{Σ R m s c ps} {Δ : Telescope zero m} → 
+        LookupSig Σ (recordSig (mkRecordSignature R Δ s) c ps) →
+        SigLookup Σ R (expandTelescope Δ (sort s))
+  rcon : ∀{Σ R m s c T πs} {Δ : Telescope zero m} → 
+         LookupSig Σ (recordSig (mkRecordSignature R Δ s) (mkConsDeclaration c T) πs) →
+         SigLookup Σ c (expandTelescope Δ T)
+  rproj : ∀{Σ R m s c π T πs} {Δ : Telescope zero m} → 
+          LookupSig Σ (recordSig (mkRecordSignature R Δ s) (mkConsDeclaration c T) πs) →
+          LookupProj πs π T →
+          SigLookup Σ π (expandTelescope Δ T)
