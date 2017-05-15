@@ -346,10 +346,11 @@ d  & ::=  & \mathit{ts} & \mbox{type signature}
 ts &::=& f : T &\\
 \end{array} \]
 A \emph{function clause} for $f$ consists of a copattern spine $\vec q$ and a right hand side $\vrhs$.
+The pattern variables of $\vec q$ are bound in context $\Gamma$.
 The right hand side is either empty or has evidence that the case is impossible.
 \[
 \begin{array}{lrll}
-cl &::=& f\; \bar{q} = \vrhs  &\\
+cl &::=& \Gamma \rhd f\; \bar{q} : U \; = \vrhs  &\\
 \vrhs & ::= & t & \text{term (clause body)}\\
       & \mid& \absurd \vec x  & (\vec x \not=\emptyset)
       \text{ absurd clause (each variable $x_i$ has empty type)} \\
@@ -755,12 +756,12 @@ Clause typing \fbox{$f : T \ders cl$}
 \ru{PV(\bar{q}) = dom(\Gamma) \qquad
     \Gamma \mid f : T \ders \lceil \bar{q} \rceil : U \qquad
     \Gamma \ders t : U}
-   {f : T \ders f\; \bar{q} = t}
+   {f : T \ders (\Gamma \rhd f\; \bar{q} : U = t)}
 \\
 \ru{PV(\bar{q}) = dom(\Gamma) \qquad
     \Gamma \mid f : T \ders \lceil \bar{q} \rceil : U \qquad
     \forall i.\ \Gamma \ders \Gamma(x_i) \mempty}
-   {f : T \ders f\; \bar{q} = \absurd \vec x}
+   {f : T \ders (\Gamma \rhd f\; \bar{q} : U = \absurd \vec x)}
 \end{gather*}
 
 Constructor typing \fbox{$\Delta \mid U : \Delta' \to s \ders c : T$}
