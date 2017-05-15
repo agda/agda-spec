@@ -230,7 +230,11 @@ suc-move (suc m) n = cong suc (+-suc m n)
 -- Add a telescope to a compatible outer context.
 addToContext : ∀{n m}  → Context n → Telescope n m → Context (n + m)
 addToContext {n}            Γ []                rewrite +-right-identity n = Γ
-addToContext {n} {.(suc m)} Γ (_∷_ {m = m} x t) rewrite suc-move n m       = addToContext (Γ ∷ʳ x) t 
+addToContext {n} {.(suc m)} Γ (_∷_ {m = m} x t) rewrite suc-move n m       = addToContext (Γ ∷ʳ x) t
+
+expandTelescope : ∀ {n m} → Telescope n m → Term n → Term n
+expandTelescope [] T = T
+expandTelescope (U ∷ Δ) T = pi U (expandTelescope Δ {!!})
 
 data Pattern (n : ℕ) : Set where
   pvariable      : Var n → Pattern n
@@ -252,6 +256,7 @@ record ProjDeclaration (n : ℕ) : Set where
     projType : Term n
 
 record DataSignature : Set where
+  constructor mkDataSignature
   field
     name         : DRName
     {numParams}  : ℕ
@@ -282,16 +287,39 @@ record RecordDefinition : Set where
     fconstructor : ConsName
     fields       : List (ProjDeclaration numParams)
 
+-- TODO: Update spec
+record FuncClause : Set where
+   field
+     ctxSize : ℕ
+     ctx   : Context ctxSize
+     name  : FuncName
+     spine : List (Copattern ctxSize)
+     rhs   : Term ctxSize
+
 -- TODO: How to represent pattern variables?
 data Declaration : Set where
   typeSignature    : FuncName → Term zero → Declaration
-  functionClause   : FuncName → List (Copattern zero) → Term zero → Declaration
+  functionClause   : FuncClause → Declaration
   dataSignature    : DataSignature    → Declaration
   dataDefinition   : DataDefinition   → Declaration
   recordSignature  : RecordSignature  → Declaration
   recordDefinition : RecordDefinition → Declaration
 
+-- TODO: Update signature declarations
 data SignatureDeclaration : Set where
-  dataSig   : DataDefinition   → SignatureDeclaration
-  recordSig : RecordDefinition → SignatureDeclaration
---  functionSig : 
+  dataSig     : DataSignature   → List (ConsDeclaration zero) → SignatureDeclaration
+  recordSig   : RecordSignature → ConsDeclaration zero →
+                List (ProjDeclaration zero) → SignatureDeclaration
+  functionSig : FuncName → Term zero → List FuncClause → SignatureDeclaration
+
+Signature : Set
+Signature = List SignatureDeclaration
+
+data LookupSig :  Signature → SignatureDeclaration → Set where
+
+  here : ∀{sd sds}
+    → LookupSig (sd ∷ sds) sd
+
+  there : ∀{sd sd' sds}
+    → LookupSig sds sd
+    → LookupSig (sd' ∷ sds) sd
