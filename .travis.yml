@@ -1,0 +1,20 @@
+dist: trusty
+sudo: required
+language: generic
+
+before_install:
+  - sudo apt-get -q update
+  - sudo apt-get install -y texlive-latex-extra texlive-math-extra mathpartir
+
+script:
+  - make docs
+
+deploy:
+  provider: pages
+  local_dir: ./docs
+  project_name: "Specification of Agda"
+  skip_cleanup: true
+  target_branch: gh-pages
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: master
