@@ -3,7 +3,7 @@
 module Syntax (QName : Set) where
 
 open import Data.Nat.Base
-open import Data.Nat.Properties.Simple using (+-suc; +-right-identity)
+open import Data.Nat.Properties using (+-suc; +-identityʳ)
 open import Data.List.Base hiding (_∷ʳ_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans)
 
@@ -229,11 +229,11 @@ suc-move (suc m) n = cong suc (+-suc m n)
 
 -- Add a telescope to a compatible outer context.
 addToContext : ∀{n m}  → Context n → Telescope n m → Context (n + m)
-addToContext {n}            Γ []                rewrite +-right-identity n = Γ
+addToContext {n}            Γ []                rewrite +-identityʳ n = Γ
 addToContext {n} {.(suc m)} Γ (_∷_ {m = m} x t) rewrite suc-move n m       = addToContext (Γ ∷ʳ x) t
 
 expandTelescope : ∀ {n m} → Telescope n m → Term (n + m) → Term n
-expandTelescope {n} [] T rewrite +-right-identity n = T
+expandTelescope {n} [] T rewrite +-identityʳ n = T
 expandTelescope {n} {suc m} (U ∷ Δ) T rewrite suc-move n m =
   pi U (expandTelescope Δ T)
 
